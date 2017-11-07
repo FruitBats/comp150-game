@@ -26,7 +26,7 @@ class Object:
     def update(self, delta_time, player, object_list, map):
         pass  # to be overloaded by objects
 
-    def render(self, screen):
+    def render(self, screen, camera):
         """Renders the object (function overloadable by subclasses)"""
         if self.sprite is not None:
             if self.sprite_angle is not 0:
@@ -65,23 +65,22 @@ class Object:
                     place_x -= sine * (self.sprite_origin.y - centre_y)
                     place_y -= cosine * (self.sprite_origin.y - centre_y)
 
-                # Move to origin
-                # TODO--Origin rotation, so hard
-
                 # Blit!
-                screen.blit(rotated_sprite, (place_x, place_y))
+                screen.blit(rotated_sprite,
+                            (place_x - camera.x * MAP.TILE_SIZE,
+                             place_y - camera.y * MAP.TILE_SIZE))
             else:
                 if isinstance(self.sprite_origin, Vector):
                     # Draw sprite at origin
                     screen.blit(
                         self.sprite,
-                        (self.x * MapClass.TILE_SIZE - self.sprite_origin.x,
-                         self.y * MapClass.TILE_SIZE - self.sprite_origin.y))
+                        ((self.x - camera.x) * MAP.TILE_SIZE - self.sprite_origin.x,
+                         (self.y - camera.y) * MAP.TILE_SIZE - self.sprite_origin.y))
                 else:
                     # Draw regular sprite
                     screen.blit(self.sprite,
-                                (self.x * MAP.TILE_SIZE,
-                                 self.y * MAP.TILE_SIZE))
+                                ((self.x - camera.x) * MAP.TILE_SIZE,
+                                 (self.y - camera.y) * MAP.TILE_SIZE))
 
     def move(self, (move_x, move_y), object_list):
         """Performs collision checking and moves object by offset of
@@ -129,3 +128,4 @@ class Object:
         self.x = desired_x
         self.y = desired_y
         return not collided
+

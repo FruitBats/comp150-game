@@ -1,3 +1,4 @@
+import sys
 import pygame
 import pickle
 
@@ -130,10 +131,10 @@ class CharacterCreation:
                         button.check_click(pygame.mouse.get_pos())
 
                 if event.type == pygame.QUIT:
-                    self.running = False
+                    sys.exit()
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                    self.running = False
+                    sys.exit()
 
     def update_screen(self):
 
@@ -259,6 +260,12 @@ class CharacterCreation:
 
         except IOError:
             print("No index file found.")
+
+    def finalise_sprite(self):
+        self.player_char.update(["background_colour"], [(0, 0, 0, 0)])
+        self.player_char.resize((64, 64))
+
+        Sprite.serialize("player_sprite", self.player_char)
 
     def finalise_sprite(self):
         self.player_char.update(["background_colour"], [(0, 0, 0, 0)])

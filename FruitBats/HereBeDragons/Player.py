@@ -9,6 +9,7 @@ from Characters import Character
 from Map import MapClass
 from Collision import CollisionParams
 from Helpers import *
+from DynaSword import DynaSword
 
 
 class Player(Character):
@@ -17,6 +18,7 @@ class Player(Character):
     friction = 90.0  # Rate of slowdown when releasing movement keys
     x_velocity = 0.0  # Rate of movement per axis in tiles/sec
     y_velocity = 0.0
+    dynasword = None  # Pointer to dynasword
 
     def __init__(self, x, y):
         """Init: Loads default player sprite and scales it up"""
@@ -36,6 +38,11 @@ class Player(Character):
         self.collision = CollisionParams((0 + 10, 0 + 10), (self.size[0] - 20, self.size[1] - 20), True)
 
     def update(self, delta_time, player, object_list, map):
+        # Perform updates
+        self.update_movement(delta_time, player, object_list, map)
+        self.update_attacks(delta_time, player, object_list, map)
+
+    def update_movement(self, delta_time, player, object_list, map):
         # Perform character movement
         key_pressed = pygame.key.get_pressed()
 
@@ -71,7 +78,7 @@ class Player(Character):
         else:
             # Normalise to friction speed at max
             current_speed = distance((0, 0),
-                                (self.x_velocity, self.y_velocity))
+                                     (self.x_velocity, self.y_velocity))
             decel_speed = self.friction  # speed of deceleration
 
             # If the player is moving slower than the friction rate,
@@ -89,7 +96,7 @@ class Player(Character):
 
         # Move player by velocity
         moved = self.move((self.x_velocity * delta_time,
-                          self.y_velocity * delta_time),
+                           self.y_velocity * delta_time),
                           object_list)
 
         if self.sprite_angle >= 360:
@@ -99,3 +106,19 @@ class Player(Character):
         if not moved:
             self.x_velocity = 0
             self.y_velocity = 0
+
+    def update_attacks(self, delta_time, player, object_list, map):
+        # Create sword
+        # TODO: Consult Michael about this. There should be a way to call
+        # game.CreateObject or something like that. Should be done on init.
+        if self.dynasword is None:
+            self.dynasword = DynaSword(self.x, self.y)
+            object_list.append(self.dynasword)
+
+        # Basic attack
+        if pygame.mouse.get_pressed()[0]:
+            self.dynasword.attack()
+        if pygame.mouse.get_pressed()[2]:
+            self.dynasword.block()
+        if pygame.mouse.get_pressed()[1]:
+            self.dynasword.boomerang()

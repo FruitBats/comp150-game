@@ -54,4 +54,4 @@ def distance((x1, y1), (x2, y2)):
 
 def direction((x1, y1), (x2, y2)):
     """Returns the direction between two points, in radians"""
-    return math.atan2(y2 - y1, x2 - x1)
+    return math.radians(270) - math.atan2(y2 - y1, x2 - x1)
