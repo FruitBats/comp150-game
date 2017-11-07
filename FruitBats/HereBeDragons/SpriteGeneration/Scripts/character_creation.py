@@ -8,7 +8,7 @@ from get_images import GetImages
 
 class CharacterCreation:
 
-    # index checkig to save the position is probably not necessary. Character creation menu doesn't really need to save user's position
+    # index checking to save the position is probably not necessary. Character creation menu doesn't really need to save user's position
 
     """
     CharacterCreation class. This class displays a character creation window and allows the user to edit the apperance
@@ -43,7 +43,8 @@ class CharacterCreation:
         running (bool): State of the pygame window. Window remains open while running is True.
     """
 
-    path_to_assets = "../Assets"
+    # path_to_assets = "../Assets"
+    path_to_assets = "SpriteGeneration/Assets"
     blank_component = pygame.image.load(path_to_assets + "/Sprites/blankComponent.png")
     blank_base = pygame.image.load(path_to_assets + "/Sprites/base/base1.png")
 
@@ -66,11 +67,11 @@ class CharacterCreation:
     hair_choices_length = 0
     legs_choices_length = 0
 
-    # loading = False
-    loading = True
+    loading = False
+    # loading = True
     running = True
 
-    def __init__(self, size, hair_list, body_list, legs_list):
+    def __init__(self, screen, hair_list, body_list, legs_list):
 
         """
         Constructor method.
@@ -82,7 +83,9 @@ class CharacterCreation:
             legs_list (list of images): The images that can be chosen for the character's legs.
         """
 
-        self.size = size
+        self.screen = screen
+        self.size = screen.get_size()
+
         self.hair_choices = hair_list
         self.body_choices = body_list
         self.legs_choices = legs_list
@@ -108,8 +111,10 @@ class CharacterCreation:
         print("Drawing screen for first time")
 
         # Initialise display
-        self.main_screen = pygame.display.set_mode(self.size)
-        self.main_screen.fill(self.background_colour)
+        # self.main_screen = pygame.display.set_mode(self.size)
+        # self.main_screen.fill(self.background_colour)
+
+        self.screen.fill(self.background_colour)
 
         self.create_buttons()
         self.update_screen()
@@ -132,9 +137,7 @@ class CharacterCreation:
     def update_screen(self):
 
         """Updates the character creation screen. Blits the character sprite to the screen and updates it."""
-
-        # Update Screen
-        self.main_screen.blit(self.player_char.image, self.char_position)
+        self.screen.blit(self.player_char.image, self.char_position)
         pygame.display.flip()
 
         print("Screen updated")
@@ -207,19 +210,20 @@ class CharacterCreation:
         y = self.char_position[1]
 
         # Hair options
-        button_hair = Button((50, 50), (right, y - 100), (0, 255, 0), self.main_screen, [self.scroll_components], [["hair", 1]], "foo")
-        button_hair_back = Button((50, 50), (left, y - 100), (255, 0, 0), self.main_screen, [self.scroll_components], [["hair", -1]], "foo")
+        button_hair = Button((50, 50), (right, y - 100), (0, 255, 0), self.screen, [self.scroll_components], [["hair", 1]], "foo")
+        button_hair_back = Button((50, 50), (left, y - 100), (255, 0, 0), self.screen, [self.scroll_components], [["hair", -1]], "foo")
 
         # Body options
-        button_body = Button((50, 50), (right, y), (0, 255, 0), self.main_screen, [self.scroll_components], [["body", 1]], "foo")
-        button_body_back = Button((50, 50), (left, y), (255, 0, 0), self.main_screen, [self.scroll_components], [["body", -1]], "foo")
+        button_body = Button((50, 50), (right, y), (0, 255, 0), self.screen, [self.scroll_components], [["body", 1]], "foo")
+        button_body_back = Button((50, 50), (left, y), (255, 0, 0), self.screen, [self.scroll_components], [["body", -1]], "foo")
 
         # Leg options
-        button_legs = Button((50, 50), (right, y + 100), (0, 255, 0), self.main_screen, [self.scroll_components], [["legs", 1]], "foo")
-        button_legs_back = Button((50, 50), (left, y + 100), (255, 0, 0), self.main_screen, [self.scroll_components], [["legs", -1]], "foo")
+        button_legs = Button((50, 50), (right, y + 100), (0, 255, 0), self.screen, [self.scroll_components], [["legs", 1]], "foo")
+        button_legs_back = Button((50, 50), (left, y + 100), (255, 0, 0), self.screen, [self.scroll_components], [["legs", -1]], "foo")
 
         # Save/finish button
-        button_save = Button((100, 50), (center[0] - 50, center[1] + 200), (0, 0, 255), self.main_screen, [Sprite.serialize, self.exit], [["player_sprite", self.player_char], None], "foo")
+        # button_save = Button((100, 50), (center[0] - 50, center[1] + 200), (0, 0, 255), self.screen, [Sprite.serialize, self.exit], [["player_sprite", self.player_char], None], "foo")
+        button_save = Button((100, 50), (center[0] - 50, center[1] + 200), (0, 0, 255), self.screen, [self.finalise_sprite, self.exit], [[], []], "foo")
 
         # Add new buttons to the list of buttons
         self.buttons.append(button_hair)
@@ -252,6 +256,12 @@ class CharacterCreation:
                 (key, val) = line.split()
                 setattr(self, key, int(val))
 
+    def finalise_sprite(self):
+        self.player_char.update(["background_colour"], [(0, 0, 0, 0)])
+        self.player_char.resize((64, 64))
+
+        Sprite.serialize("player_sprite", self.player_char)
+
     def exit(self):
 
         """Closes the character creation window. This could be adapted to lead into the main game."""
@@ -260,11 +270,9 @@ class CharacterCreation:
         self.running = False
 
 
-# Calling as test
-images = GetImages("../Assets", ".png", (128, 128))
-
-test_window = CharacterCreation((800, 600), images.hair, images.body, images.legs)
-test_window.draw_win()
-
-test_window.save_component_index("char_creation_index.txt")
+def load_creation_window(screen):
+    images = GetImages("SpriteGeneration/Assets", ".png", (128, 128))
+    test_window = CharacterCreation(screen, images.hair, images.body, images.legs)
+    test_window.draw_win()
+    test_window.save_component_index("char_creation_index.txt")
 

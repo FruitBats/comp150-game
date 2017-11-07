@@ -13,6 +13,7 @@ class Sprite:
 
     # The image used for the sprite
     image = None
+    components = []
 
     def __init__(self, size, background_colour, base, legs, body, hair, feet, weapon):
 
@@ -44,7 +45,6 @@ class Sprite:
         print("Sprite body is " + str(self.body))
 
         self.sprite_base = pygame.Surface(self.size, pygame.SRCALPHA, 32)
-        #self.sprite_base.set_alpha(255)
 
     def draw(self):
 
@@ -83,7 +83,7 @@ class Sprite:
         # Save sprite
         self.image = self.sprite_base
 
-    def update(self, to_update, new_values):
+    def update(self, to_update, new_values, draw=True):
 
         """
         Updates the sprite image. Can be called with multiple values to change at once.
@@ -96,7 +96,20 @@ class Sprite:
         for i in range (0, len(to_update)):
             setattr(self, to_update[i], new_values[i])
 
-        self.draw()
+        if draw:
+            self.draw()
+
+    def resize(self, size):
+        self.size = size
+        self.image = pygame.transform.scale(self.image, size)
+        self.base = pygame.transform.scale(self.base, size)
+        self.legs = pygame.transform.scale(self.legs, size)
+        self.body = pygame.transform.scale(self.body, size)
+        self.hair = pygame.transform.scale(self.hair, size)
+        self.feet = pygame.transform.scale(self.feet, size)
+        # self.weapon = pygame.transform.scale(self.weapon, size)
+
+        self.sprite_base = pygame.transform.scale(self.sprite_base, size)
 
     def save_with_id(self, save_path, file_type):
 
@@ -172,7 +185,7 @@ class Sprite:
         loaded_sprite.legs = pygame.image.fromstring(loaded_sprite.legs, loaded_sprite.size, "RGBA")
         loaded_sprite.body = pygame.image.fromstring(loaded_sprite.body, loaded_sprite.size, "RGBA")
         loaded_sprite.hair = pygame.image.fromstring(loaded_sprite.hair, loaded_sprite.size, "RGBA")
-        loaded_sprite.feet = pygame.image.fromstring(loaded_sprite.feet, (16, 16), "RGBA")            # No component set for feet therefore size has not been scaled up
+        loaded_sprite.feet = pygame.image.fromstring(loaded_sprite.feet, loaded_sprite.size, "RGBA")            # No component set for feet therefore size has not been scaled up
 
         loaded_sprite.sprite_base = pygame.image.fromstring(loaded_sprite.sprite_base, loaded_sprite.size, "RGBA")
 

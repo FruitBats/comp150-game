@@ -28,7 +28,12 @@ class Player(Character):
         #                (MapClass.TILE_SIZE, MapClass.TILE_SIZE))
         self.x = x
         self.y = y
-        self.collision = CollisionParams((10, 1), (39, 72), True)
+
+        self.size = self.sprite.get_size()
+        # self.sprite_origin = (self.size[0] / 2), (self.size[1] / 2)    # Wasn't sure if origin should be set here or not.
+
+        # self.collision = CollisionParams((10, 1), (39, 72), True)
+        self.collision = CollisionParams((0 + 10, 0 + 10), (self.size[0] - 20, self.size[1] - 20), True)
 
     def update(self, delta_time, player, object_list, map):
         # Perform character movement
