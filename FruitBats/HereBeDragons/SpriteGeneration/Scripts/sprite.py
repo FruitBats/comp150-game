@@ -175,18 +175,21 @@ class Sprite:
         Returns:
             loaded_sprite (Sprite): The instance of Sprite that was pickled.
         """
+        try:
+            binary_file = open(file + ".bin", mode="rb")
+            loaded_sprite = pickle.load(binary_file)
+            binary_file.close()
 
-        binary_file = open(file + ".bin", mode="rb")
-        loaded_sprite = pickle.load(binary_file)
-        binary_file.close()
+            loaded_sprite.image = pygame.image.fromstring(loaded_sprite.image, loaded_sprite.size, "RGBA")
+            loaded_sprite.base = pygame.image.fromstring(loaded_sprite.base, loaded_sprite.size, "RGBA")
+            loaded_sprite.legs = pygame.image.fromstring(loaded_sprite.legs, loaded_sprite.size, "RGBA")
+            loaded_sprite.body = pygame.image.fromstring(loaded_sprite.body, loaded_sprite.size, "RGBA")
+            loaded_sprite.hair = pygame.image.fromstring(loaded_sprite.hair, loaded_sprite.size, "RGBA")
+            loaded_sprite.feet = pygame.image.fromstring(loaded_sprite.feet, loaded_sprite.size, "RGBA")            # No component set for feet therefore size has not been scaled up
 
-        loaded_sprite.image = pygame.image.fromstring(loaded_sprite.image, loaded_sprite.size, "RGBA")
-        loaded_sprite.base = pygame.image.fromstring(loaded_sprite.base, loaded_sprite.size, "RGBA")
-        loaded_sprite.legs = pygame.image.fromstring(loaded_sprite.legs, loaded_sprite.size, "RGBA")
-        loaded_sprite.body = pygame.image.fromstring(loaded_sprite.body, loaded_sprite.size, "RGBA")
-        loaded_sprite.hair = pygame.image.fromstring(loaded_sprite.hair, loaded_sprite.size, "RGBA")
-        loaded_sprite.feet = pygame.image.fromstring(loaded_sprite.feet, loaded_sprite.size, "RGBA")            # No component set for feet therefore size has not been scaled up
+            loaded_sprite.sprite_base = pygame.image.fromstring(loaded_sprite.sprite_base, loaded_sprite.size, "RGBA")
 
-        loaded_sprite.sprite_base = pygame.image.fromstring(loaded_sprite.sprite_base, loaded_sprite.size, "RGBA")
+            return loaded_sprite
+        except IOError:
+            print("No player save found.")
 
-        return loaded_sprite

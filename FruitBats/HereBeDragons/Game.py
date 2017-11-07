@@ -43,11 +43,12 @@ class Game:
             character_creation.load_creation_window(self.screen)
 
         # Init map
-        self.map = MapClass()
+        self.map = MapClass(seed=10)
 
         # Init character
         self.player = Player(0, 0)
-        self.player.sprite = Sprite.deserialize("player_sprite").image
+        if Sprite.deserialize("player_sprite") is not None:
+            self.player.sprite = Sprite.deserialize("player_sprite").image
 
         # Init objects and player
         self.objects = list()

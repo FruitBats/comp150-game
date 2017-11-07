@@ -99,6 +99,7 @@ class CharacterCreation:
 
         # Check if loading from serialized file. This should be temporary. For testing only.
         if self.loading:
+            #if Sprite.deserialize("player_sprite") is not None:
             self.player_char = Sprite.deserialize("player_sprite")
 
         else:
@@ -250,11 +251,14 @@ class CharacterCreation:
     def read_component_index(self, save_file):
 
         """Reads the save file and sets the appropriate index value to the saved values."""
+        try:
+            with open(save_file) as f:
+                for line in f:
+                    (key, val) = line.split()
+                    setattr(self, key, int(val))
 
-        with open(save_file) as f:
-            for line in f:
-                (key, val) = line.split()
-                setattr(self, key, int(val))
+        except IOError:
+            print("No index file found.")
 
     def finalise_sprite(self):
         self.player_char.update(["background_colour"], [(0, 0, 0, 0)])
