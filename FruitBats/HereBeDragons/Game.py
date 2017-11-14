@@ -10,6 +10,8 @@ from Enemy import ChaserEnemy
 from Map import MapClass, MAP
 from Camera import Camera
 from Menu import *
+from Invent import *
+from Fog import Fog
 
 from SpriteGeneration import character_creation
 from SpriteGeneration import Sprite
@@ -20,6 +22,7 @@ class Game:
     tick_time = 0   # time at the start of the frame, in seconds since
                     # the game started
     start_time = 0  # initial time.clock() value on startup (OS-dependent)
+    t0 = time.time()
     screen = None   # PyGame screen
     camera = None   # movable camera object
     objects = None  # list of active objects in the game
@@ -55,10 +58,16 @@ class Game:
         # Init map
         self.map = MapClass(seed=10)
 
+        # Init fog
+        self.fog = Fog()
+
         # Init character
         self.player = Player(0, 0)
         if Sprite.deserialize("player_sprite") is not None:
             self.player.sprite = Sprite.deserialize("player_sprite").image
+
+        # Init inventory
+        self.invent = Inventory()
 
         # Init objects and player
         self.objects = list()
@@ -89,6 +98,15 @@ class Game:
 
             self.delta_time = self.tick_time - last_time
 
+            # Change day to true or false every #seconds, calls fog function to update surface
+            seconds = 10
+            t1 = time.time()
+            dt = t1 - self.t0  # gets difference in start time and current time
+            if dt >= seconds:
+                self.fog.day = not self.fog.day
+                self.t0 = t1  # resets timer variable
+                self.fog.lift_fog()
+
             # Cap delta time to 10FPS to prevent gamebreaking bugs
             if self.delta_time >= 0.1:
                 self.delta_time = 0.1
@@ -113,6 +131,14 @@ class Game:
             for obj in self.objects:
                 obj.render(self.screen, self.camera)
             self.player.render(self.screen, self.camera)
+
+            # Render fog
+            self.screen.blit(self.fog.surface, ((self.player.x - self.camera.x) * MAP.TILE_SIZE - int(self.SCREEN_WIDTH*1.5 - self.player.sprite.get_width()/2),
+                                                (self.player.y - self.camera.y) * MAP.TILE_SIZE - int(self.SCREEN_HEIGHT*1.5 - self.player.sprite.get_height()/2)))
+
+            # Update inventory
+            self.invent.update()
+            self.invent.render_invent(self.screen)
 
             # Splat to screen
             pygame.display.flip()
