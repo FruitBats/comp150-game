@@ -114,10 +114,10 @@ class Enemy(Character):
 
         # TODO: Talk to Louis about the DynaSword. Currently, the attack time dictates the angle of the swing.
         # TODO: Attack time should instead dictate how long the swing takes to complete, regardless of angle.
-        # TODO: Fix rendering. Currently enemy sword is rendering on the player?
+        # TODO: Tweak rendering. Currently renders to the enemy, but isnt as precise as it could be.
 
         if self.dynasword2 is None:
-            self.dynasword2 = DynaSword(self.x, self.y)
+            self.dynasword2 = DynaSword(self.x, self.y, self)
             object_list.append(self.dynasword2)
 
         # Basic attack

@@ -25,16 +25,22 @@ class DynaSword(Object):
     origin_x = 0  # position of the sword's origin (usually the player's hand)
     origin_y = 0  # position of the sword's origin (usually the player's hand)
 
-    def __init__(self, x, y):
+    owner = None # Object that is using the dynasword
+
+    def __init__(self, x, y, owner):
         """Construct the object at position
 
          Args:
              x: x position to spawn object
              y: y position to spawn object
+             owner (Object): Object that is using the sword.
         """
         self.sprite = pygame.image.load("graphics/sword.png")
         self.x = x
         self.y = y
+
+        self.owner = owner
+
         self.handle_origin = Vector(self.sprite.get_width() / 3,
                                     self.sprite.get_height())
         self.centre_origin = Vector(self.sprite.get_width() / 2,
@@ -52,17 +58,18 @@ class DynaSword(Object):
             object_list: Pointer to the list of game objects
             map: Pointer to the game map
         """
+
         # Set position
-        hand_x = player.x + float(14) / MAP.TILE_SIZE
-        hand_y = player.y + float(47) / MAP.TILE_SIZE
-        self.origin_x = player.x + float(player.sprite.get_width()) / 2 \
+        hand_x = self.owner.x + float(14) / MAP.TILE_SIZE
+        hand_y = self.owner.y + float(47) / MAP.TILE_SIZE
+        self.origin_x = self.owner.x + float(self.owner.sprite.get_width()) / 2 \
                           / MAP.TILE_SIZE
-        self.origin_y = player.y + float(player.sprite.get_height()) / 2 \
+        self.origin_y = self.owner.y + float(self.owner.sprite.get_height()) / 2 \
                           / MAP.TILE_SIZE
         self.x = self.origin_x - math.sin(math.radians(self.attack_angle)) \
-                    * float(player.sprite.get_width()) / MAP.TILE_SIZE * 0.6
+                    * float(self.owner.sprite.get_width()) / MAP.TILE_SIZE * 0.6
         self.y = self.origin_y - math.cos(math.radians(self.attack_angle)) \
-                    * float(player.sprite.get_height()) / MAP.TILE_SIZE * 0.6
+                    * float(self.owner.sprite.get_height()) / MAP.TILE_SIZE * 0.6
 
         # Do attack-specific positioning and angling
         if self.attack_state == DynaAttack.NONE:

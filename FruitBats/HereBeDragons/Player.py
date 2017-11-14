@@ -112,7 +112,7 @@ class Player(Character):
         # TODO: Consult Michael about this. There should be a way to call
         # game.CreateObject or something like that. Should be done on init.
         if self.dynasword is None:
-            self.dynasword = DynaSword(self.x, self.y)
+            self.dynasword = DynaSword(self.x, self.y, self)
             object_list.append(self.dynasword)
 
         # Basic attack
