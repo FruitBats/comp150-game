@@ -82,13 +82,31 @@ class Object:
                                 ((self.x - camera.x) * MAP.TILE_SIZE,
                                  (self.y - camera.y) * MAP.TILE_SIZE))
         if self.debug_render_hitbox and self.collision:
+            # Draw a collision box around the sprite
             camera_vector = Vector(camera.x, camera.y)
+
             coll_origin = (Vector(self.x, self.y) - camera_vector) * MAP.TILE_SIZE \
-                          + Vector(self.collision.x, self.collision.y)
+                + Vector(self.collision.x, self.collision.y)
+            coll_origin -= self.get_down() * self.sprite_origin.y
+            coll_origin -= self.get_right() * self.sprite_origin.x
             coll_down = self.get_down() * self.collision.height * MAP.TILE_SIZE
             coll_right = self.get_right() * self.collision.width * MAP.TILE_SIZE
+
+            # Draw centre
+            pygame.draw.circle(screen, (255, 0, 0), (int(coll_origin.x), int(coll_origin.y)), 3, 1)
+            # Draw left
             pygame.draw.line(screen, (255, 0, 0), tuple(coll_origin),
                              tuple(coll_origin + coll_down), 1)
+            # Draw bottom
+            pygame.draw.line(screen, (255, 0, 0), tuple(coll_origin + coll_down),
+                             tuple(coll_origin + coll_down + coll_right), 1)
+            # Draw right
+            pygame.draw.line(screen, (255, 0, 0),
+                             tuple(coll_origin + coll_down + coll_right),
+                             tuple(coll_origin + coll_right), 1)
+            # Draw top
+            pygame.draw.line(screen, (255, 0, 0), tuple(coll_origin + coll_right),
+                             tuple(coll_origin), 1)
 
     def move(self, (move_x, move_y), object_list):
         """Performs collision checking and moves object by offset of
@@ -141,12 +159,12 @@ class Object:
         """Gets 'down' vector according to sprite rotation. Default is 0,1
             Returns: Vector
         """
-        return Vector(-math.sin(math.radians(self.sprite_angle)),
-                      -math.cos(math.radians(self.sprite_angle)))
+        return Vector(math.sin(math.radians(self.sprite_angle)),
+                      math.cos(math.radians(self.sprite_angle)))
 
     def get_right(self):
         """Gets 'right' vector according to sprite rotation. Default is 1,0
             Returns: Vector
         """
         return Vector(math.cos(math.radians(self.sprite_angle)),
-                      math.sin(math.radians(self.sprite_angle)))
+                      -math.sin(math.radians(self.sprite_angle)))
