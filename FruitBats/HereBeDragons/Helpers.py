@@ -1,7 +1,7 @@
 import math
 
 
-class Vector:
+class Vector():
     """Vector container class for xy coordinates
        Can also be used as a tuple."""
     x = 0.0
@@ -34,6 +34,10 @@ class Vector:
     def __mul__(self, multiplier):
         """Multiply vector components by a scalar"""
         return Vector(self.x * multiplier, self.y * multiplier)
+
+    def __div__(self, divisor):
+        """Divide vector components by a scalar"""
+        return Vector(self.x / divisor, self.y / divisor)
 
     def __iter__(self):
         """Iterator allows vectors to be used as tuples"""

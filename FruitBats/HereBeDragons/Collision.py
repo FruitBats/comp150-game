@@ -1,12 +1,13 @@
 from Map import MAP
 
+
 class CollisionParams:
     shape = 0  # Todo: Add sphere collision etc?
     x = 0  # X offset of collision box in tiles (relative to parent object)
     y = 0  # Y offset of collision box in tiles
     width = 0  # Width of collision box in tiles
     height = 0  # Height of collision box in tiles
-    solid = False
+    solid = False  # Whether this collision box should block objects in move()
 
     def __init__(self, (x, y), (width, height), solid):
         """Initialises collision box, in pixels
