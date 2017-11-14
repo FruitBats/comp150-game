@@ -7,6 +7,7 @@ from Player import Player
 from TestObject import PikachuStatue
 from Attack import Swipe
 from Enemy import ChaserEnemy
+from Enemy import Enemy # Mango testing
 from Map import MapClass, MAP
 from Camera import Camera
 from Menu import *
@@ -56,14 +57,15 @@ class Game:
             character_creation.load_creation_window(self.screen)
 
         # Init map
-        self.map = MapClass()
+        self.map = MapClass(seed=10)
 
         # Init fog
         self.fog = Fog()
 
         # Init character
         self.player = Player(0, 0)
-        self.player.sprite = Sprite.deserialize("player_sprite").image
+        if Sprite.deserialize("player_sprite") is not None:
+            self.player.sprite = Sprite.deserialize("player_sprite").image
 
         # Init inventory
         self.invent = Inventory()
@@ -83,7 +85,8 @@ class Game:
         self.objects.append(Swipe(3, 3))
 
         # Init test enemy at 5,5
-        self.objects.append(ChaserEnemy(3, 3))
+        #self.objects.append(ChaserEnemy(3, 3))  # Testing with new enemy type
+        self.objects.append(Enemy(3, 3, 10))
 
         # Init main game parameters
         self.start_time = time.clock()
