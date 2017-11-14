@@ -88,7 +88,7 @@ class DynaSword(Object):
         if self.attack_state == DynaAttack.NONE:
             self.attack_state = DynaAttack.SWIPING
             self.attack_timer_start = 0.1
-            self.attack_timer = 0.1
+            self.attack_timer = 1 # 0.1
             self.attack_angle = math.degrees(direction(
                 (self.x, self.y),
                 (self.mouse_x, self.mouse_y)))
