@@ -34,3 +34,4 @@
 # JetBrains Rider
 .idea/
 *.sln.iml
+/FruitBats/HereBeDragons/player_sprite.bin
