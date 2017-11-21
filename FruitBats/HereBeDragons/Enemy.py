@@ -140,8 +140,9 @@ class Enemy(Character):
         # Chase the player if close
         if self.chasing:
             to_player = Vector(player.x - self.x, player.y - self.y)
+            to_player.normalise(delta_time * self.acceleration * (1 - self.player_distance / self.detection_range))
 
-            self.velocity += to_player.normalise(delta_time * self.acceleration * (1 - self.player_distance / self.detection_range))
+            self.velocity += to_player
 
         # Move according to velocity
         if not self.move(self.velocity * delta_time, object_list):

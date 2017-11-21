@@ -4,8 +4,8 @@ import random
 class MAP:
     SEA_CHANCE = 20  # Larger number, lower sea chance
     TILE_SIZE = 80  # size of game tiles in pixels
-    SIZE_Y = 60
-    SIZE_X = 60
+    SIZE_Y = 20  # 60
+    SIZE_X = 20  # 60
     TILE_INFO = [  # INFORMATION ON TILES (SPAWN WEIGHT, FILE NAME)
         [20, "ImageFiles/Ground/temp_grass.jpg"],
         [3, "ImageFiles/Ground/temp_mountain.jpg"],

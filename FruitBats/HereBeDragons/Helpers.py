@@ -7,17 +7,39 @@ class Vector():
     x = 0.0
     y = 0.0
 
+    def dot(self, other):
+        """Returns the dot product of two Vectors as a float"""
+        return float(self.x) * other.x + float(self.y) * other.y
+
     def normalise(self, value=1.0):
         """Scales the vector so that its length = value"""
         length = math.sqrt(self.x * self.x + self.y * self.y)
+
         if length > 0:
-            return Vector(self.x * value / length, self.y * value / length)
+            self.x /= length
+            self.y /= length
         else:
-            return Vector(0, 0)  # prevent division by zero
+            self.x = 1  # how to error handling
 
     def length(self):
         """Returns the length of the vector as a float"""
         return math.sqrt(self.x * self.x + self.y * self.y)
+
+    @staticmethod
+    def intersection(start1, end1, start2, end2):
+        """Checks two lines between Vector points start1, end1 and start2, end2, and returns whether they intersect (boolean)"""
+        opp = Vector(-(end2.y - start2.y), end2.x - start2.x)
+        opp.normalise()
+
+        dot_range = Vector.dot(start1 - start2, opp) - Vector.dot(end1 - start2, opp)
+
+        coll_cross_factor = (Vector.dot(start1 - start2, opp) / dot_range)
+        other_check = Vector.dot(start1 + (end1 - start1) * coll_cross_factor - start2, end2 - start2)
+
+        if coll_cross_factor >= 0 and coll_cross_factor < 1 and other_check >= 0 and other_check < Vector.dot(end2 - start2, end2 - start2):
+            return True
+        else:
+            return False
 
     def __init__(self, x, y):
         self.x = float(x)

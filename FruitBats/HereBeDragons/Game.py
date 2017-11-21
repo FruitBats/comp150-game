@@ -13,6 +13,7 @@ from Camera import Camera
 from Menu import *
 from Invent import *
 from Fog import Fog
+from Helpers import Vector
 
 from SpriteGeneration import character_creation
 from SpriteGeneration import Sprite
@@ -79,8 +80,9 @@ class Game:
 
         # Add test Pikachi (Pikachodes?) (plural?)
         for i in xrange(10):
-            self.objects.append(PikachuStatue(random.randint(0, 10),
-                                              random.randint(0, 10)))
+            pika = PikachuStatue(random.randint(0, 10), random.randint(0, 10))
+            self.objects.append(pika)
+            pika.debug_render_hitbox = True
         # Add test sword
         self.objects.append(Swipe(3, 3))
 
@@ -135,8 +137,8 @@ class Game:
             self.player.render(self.screen, self.camera)
 
             # Render fog
-            self.screen.blit(self.fog.surface, ((self.player.x - self.camera.x) * MAP.TILE_SIZE - int(self.SCREEN_WIDTH*1.5 - self.player.sprite.get_width()/2),
-                                                (self.player.y - self.camera.y) * MAP.TILE_SIZE - int(self.SCREEN_HEIGHT*1.5 - self.player.sprite.get_height()/2)))
+            #self.screen.blit(self.fog.surface, ((self.player.x - self.camera.x) * MAP.TILE_SIZE - int(self.SCREEN_WIDTH*1.5 - self.player.sprite.get_width()/2),
+            #                                    (self.player.y - self.camera.y) * MAP.TILE_SIZE - int(self.SCREEN_HEIGHT*1.5 - self.player.sprite.get_height()/2)))
 
             # Update inventory
             self.invent.update()
