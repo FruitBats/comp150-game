@@ -19,13 +19,13 @@ class Fog:
         """
         Creates a black surface and then renders a circle getting less transparent as it
         spreads out, if its night time the circle of vision is much smaller
+        inspiration taken from https://github.com/paddypolson/Foggy/blob/master/gameplay.py
         """
 
         self.surface = pygame.Surface((self.SCREEN_WIDTH, self.SCREEN_HEIGHT), pygame.SRCALPHA)
         self.surface.fill((0, 0, 0, 255))
         if self.day:
-            m = 255/float(350)  # float used to multiply i increasing the alpha must be close
-            # to range to avoid alpha being higher than 255
+            m = 255/float(350)  # float used to multiply i increasing the alpha must be close to range to avoid alpha being higher than 255
             for i in range(350, 1, -1):  # loop starts at first number and counts down by 1 until at 1
                 pygame.draw.circle(self.surface, (0, 0, 0, i*m), (self.SCREEN_WIDTH/2, self.SCREEN_HEIGHT/2), i)
         else:
