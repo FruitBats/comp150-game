@@ -20,7 +20,7 @@ class Player(Character):
     y_velocity = 0.0
     dynasword = None  # Pointer to dynasword
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, parent_map):
         """Init: Loads default player sprite and scales it up"""
         # Load character image
         self.sprite = pygame.image.load('graphics/game_character.png')
@@ -30,6 +30,7 @@ class Player(Character):
         #                (MapClass.TILE_SIZE, MapClass.TILE_SIZE))
         self.x = x
         self.y = y
+        self.parent_map = parent_map
 
         self.size = self.sprite.get_size()
         # self.sprite_origin = (self.size[0] / 2), (self.size[1] / 2)    # Wasn't sure if origin should be set here or not.
