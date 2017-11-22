@@ -20,8 +20,7 @@ from SpriteGeneration import Sprite
 
 class Game:
     delta_time = 0  # time passed since last frame
-    tick_time = 0   # time at the start of the frame, in seconds since
-                    # the game started
+    tick_time = 0   # time at the start of the frame, in seconds since the game started
     start_time = 0  # initial time.clock() value on startup (OS-dependent)
     t0 = time.time()
     screen = None   # PyGame screen
@@ -31,8 +30,8 @@ class Game:
     map = None      # MapClass object
     quitting = False
     menu = None
-    SCREEN_WIDTH = 800  # 640
-    SCREEN_HEIGHT = 600  # 480
+    SCREEN_WIDTH = 800  # defines screen width
+    SCREEN_HEIGHT = 600  # defines screen height
 
     new_game = True    # If the player needs to create a character or not. For testing only currently.
 
@@ -137,7 +136,7 @@ class Game:
             # Render fog
             self.fog.render_fog(self)
 
-            # Update inventory
+            # Update inventory and render
             self.invent.update(events)
             self.invent.render_invent(self.screen, self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
 
