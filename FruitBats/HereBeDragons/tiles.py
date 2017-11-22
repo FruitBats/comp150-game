@@ -40,5 +40,5 @@ class TILE_TYPES:
     BEACH = Tile(0, "ImageFiles/Sea/Sand.jpg", True)
 
     # Testing tiles
-    GRID_GRASS = Tile(20, "ImageFiles/Ground/test_grid_grass.jpg", True)
-    GRID_MOUNTAIN = Tile(5, "ImageFiles/Ground/test_grid_mountain.jpg", False)
+    #GRID_GRASS = Tile(20, "ImageFiles/Ground/test_grid_grass.jpg", True)
+    #GRID_MOUNTAIN = Tile(5, "ImageFiles/Ground/test_grid_mountain.jpg", False)
