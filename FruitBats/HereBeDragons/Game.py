@@ -83,9 +83,9 @@ class Game:
         # Add test sword
         self.objects.append(Swipe(3, 3))
 
-        # Init test enemy at 5,5
+        # Init test enemy
         # self.objects.append(ChaserEnemy(3, 3, self.map))  # Testing with new enemy type
-        # self.objects.append(Enemy(3, 3, 10, self.map))
+        self.objects.append(Enemy(3, 3, 10, self.map))
 
         # Init main game parameters
         self.start_time = time.clock()

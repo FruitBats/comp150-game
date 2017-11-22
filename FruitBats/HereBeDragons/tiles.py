@@ -33,7 +33,7 @@ class TILE_TYPES:
 
     # Impassable tiles
     MOUNTAIN = Tile(3, "ImageFiles/Ground/temp_mountain.jpg", False)
-    ROCK = Tile(2, "ImageFiles/Ground/temp_rock.jpg", False)
+    ROCK = Tile(2, "ImageFiles/Ground/temp_rock.jpg", False)  # This could be changed to  be walkable. Too many impassable tiles may break game flow.
 
     # Sea tiles
     SEA = Tile(0, "ImageFiles/Sea/Sea.jpg", False)
