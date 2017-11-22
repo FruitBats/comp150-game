@@ -1,6 +1,5 @@
 import pygame
 
-# TODO add colliders and check collision!
 
 class Tile:
     TILE_SIZE = 80
@@ -25,11 +24,21 @@ class Tile:
 
 
 class TILE_TYPES:
+    """Map tile types are instantiated here"""
+
+    # Passable tiles
     GRASS = Tile(20, "ImageFiles/Ground/temp_grass.jpg", True)
     GRASS2 = Tile(5, "ImageFiles/Ground/temp_grass2.jpg", True)
-    MOUNTAIN = Tile(3, "ImageFiles/Ground/temp_mountain.jpg", False)
-    ROCK = Tile(2, "ImageFiles/Ground/temp_rock.jpg", False)
     SPOOKY = Tile(1, "ImageFiles/Ground/temp_spooky.jpg", True)
 
+    # Impassable tiles
+    MOUNTAIN = Tile(3, "ImageFiles/Ground/temp_mountain.jpg", False)
+    ROCK = Tile(2, "ImageFiles/Ground/temp_rock.jpg", False)
+
+    # Sea tiles
+    SEA = Tile(0, "ImageFiles/Sea/Sea.jpg", False)
+    BEACH = Tile(0, "ImageFiles/Sea/Sand.jpg", True)
+
+    # Testing tiles
     GRID_GRASS = Tile(20, "ImageFiles/Ground/test_grid_grass.jpg", True)
     GRID_MOUNTAIN = Tile(5, "ImageFiles/Ground/test_grid_mountain.jpg", False)
