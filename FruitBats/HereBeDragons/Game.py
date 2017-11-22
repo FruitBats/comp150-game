@@ -1,5 +1,7 @@
+# Todo: Clean up unused imports
 import time
 import random
+import math
 
 import pygame
 
@@ -14,6 +16,7 @@ from Menu import *
 from Invent import *
 from Fog import Fog
 from Helpers import Vector
+from Projectiles import Arrow
 
 from SpriteGeneration import character_creation
 from SpriteGeneration import Sprite
@@ -87,13 +90,14 @@ class Game:
 
         # Init test enemy at 5,5
         # self.objects.append(ChaserEnemy(3, 3))  # Testing with new enemy type
-        self.objects.append(Enemy(3, 3, 10))
+        #self.objects.append(Enemy(3, 3, 10))
 
         # Init main game parameters
         self.start_time = time.clock()
         self.delta_time = 0.0
 
         # Main loop
+        fire_time = 0
         while not self.quitting:
             # Update timing
             last_time = self.tick_time
@@ -136,8 +140,19 @@ class Game:
             self.player.render(self.screen, self.camera)
 
             # Render fog
+            #self.fog.render_fog(self)
 
-            self.fog.render_fog(self)
+            # Test fire arrow
+            fire_time -= self.delta_time
+            if fire_time <= 0:
+                fire_time = 1
+                distance = 3
+                ang = float(random.randrange(0, 360, 1))
+                spawn_pos = (self.player.x + math.sin(math.radians(ang)) * distance, self.player.y + math.cos(math.radians(ang)) * distance)
+                velocity = Vector(0, 0)
+                velocity.point_at_angle(ang - 180, 5)
+                self.objects.append(Arrow(spawn_pos, tuple(velocity), ang))
+
             # Update inventory
             self.invent.update()
             self.invent.render_invent(self.screen)

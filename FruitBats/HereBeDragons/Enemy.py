@@ -2,7 +2,7 @@ import pygame
 
 from Characters import Character
 from Helpers import *
-from Collision import CollisionParams
+from Collision import CollisionBox
 from DynaSword import DynaSword
 
 
@@ -15,7 +15,7 @@ class ChaserEnemy(Character):
     def __init__(self, x, y):
         self.x = float(x)
         self.y = float(y)
-        self.collision = CollisionParams((10, 1), (39, 72), True)
+        self.collision = CollisionBox((10, 1), (39, 72), True)
         self.sprite = pygame.image.load("graphics/enemy.png")
         self.velocity = Vector(0, 0)
 
@@ -70,7 +70,7 @@ class Enemy(Character):
         self.x = float(x)
         self.y = float(y)
         self.hitpoints = hitpoints
-        self.collision = CollisionParams((10, 1), (39, 72), True)
+        self.collision = CollisionBox((10, 1), (39, 72), True)
         self.sprite = pygame.image.load("graphics/enemy.png")
         self.velocity = Vector(0, 0)
 

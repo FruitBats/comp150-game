@@ -25,6 +25,19 @@ class Vector():
         """Returns the length of the vector as a float"""
         return math.sqrt(self.x * self.x + self.y * self.y)
 
+    def point_at_angle(self, angle, length):
+        """Points the vector towards 'angle' with a specified length
+            Arguments:
+                angle (float): Angle of vector, in degrees
+                length (float): Length of the vector
+        """
+        self.x = -math.sin(math.radians(angle)) * length
+        self.y = -math.cos(math.radians(angle)) * length
+
+    @staticmethod
+    def to_angle(angle, length):
+        return Vector(-math.sin(math.radians(angle)) * length, -math.cos(math.radians(angle)) * length)
+
     @staticmethod
     def intersection(start1, end1, start2, end2):
         """Checks two lines between Vector points start1, end1 and start2, end2, and returns whether they intersect (boolean)"""
@@ -32,6 +45,9 @@ class Vector():
         opp.normalise()
 
         dot_range = Vector.dot(start1 - start2, opp) - Vector.dot(end1 - start2, opp)
+
+        if dot_range <= 0.0001:
+            return False
 
         coll_cross_factor = (Vector.dot(start1 - start2, opp) / dot_range)
         other_check = Vector.dot(start1 + (end1 - start1) * coll_cross_factor - start2, end2 - start2)

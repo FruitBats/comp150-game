@@ -3,7 +3,7 @@ import math
 import pygame
 
 from Map import MapClass, MAP
-from Collision import CollisionParams
+from Collision import CollisionBox
 from Helpers import Vector
 
 
@@ -22,7 +22,7 @@ class Object:
         """Initialise object at the given position"""
         self.x = x
         self.y = y
-        self.collision = CollisionParams((0.0, 0.0), (1.0, 1.0), True)
+        self.collision = CollisionBox((0.0, 0.0), (1.0, 1.0), True)
 
     def update(self, delta_time, player, object_list, map):
         self.debug_dyna = player.dynasword
@@ -79,8 +79,10 @@ class Object:
                     screen.blit(self.sprite,
                                 ((self.x - camera.x) * MAP.TILE_SIZE,
                                  (self.y - camera.y) * MAP.TILE_SIZE))
+
         if self.debug_render_hitbox and self.collision:
             # Draw a collision box around the sprite
+            # Prepare (potentially rotated) collision box vectors
             camera_vector = Vector(camera.x, camera.y)
 
             coll_origin = (Vector(self.x, self.y) - camera_vector) * MAP.TILE_SIZE + Vector(self.collision.x, self.collision.y)
@@ -104,8 +106,15 @@ class Object:
                 other_coll_down = self.debug_dyna.get_down() * self.debug_dyna.collision.height * MAP.TILE_SIZE
 
             # Render sides of box
-            # Draw origin
-            pygame.draw.circle(screen, (255, 0, 0), (int(coll_origin.x), int(coll_origin.y)), 3, 1)
+            # Draw pivot point
+            vec = self.get_pos_at_pixel((self.sprite.get_width() / 2, 0)) - camera_vector
+            vec2 = self.get_pos_at_pixel((self.sprite.get_width() / 2, self.sprite.get_height())) - camera_vector
+            pygame.draw.line(screen, (0, 0, 255), tuple(vec * MAP.TILE_SIZE), tuple(vec2 * MAP.TILE_SIZE), 1)
+            if self.sprite_origin:
+                centre_point = (Vector(self.x, self.y) - camera_vector) * MAP.TILE_SIZE
+                pygame.draw.circle(screen, (255, 0, 0), (int(centre_point.x), int(centre_point.y)), 3, 1)
+            else:
+                pygame.draw.circle(screen, (255, 0, 0), (int(coll_origin.x), int(coll_origin.y)), 3, 1)
             # Draw left
             pygame.draw.line(screen, (255, 0, 0), tuple(coll_origin), tuple(coll_origin + coll_down), 1)
             # Draw bottom
@@ -114,6 +123,14 @@ class Object:
             pygame.draw.line(screen, (255, 0, 0), tuple(coll_origin + coll_down + coll_right), tuple(coll_origin + coll_right), 1)
             # Draw top
             pygame.draw.line(screen, (255, 0, 0), tuple(coll_origin + coll_right), tuple(coll_origin), 1)
+
+            # Render bounding box
+            if self.sprite_angle is not 0:
+                x_off = (self.x - camera.x) * MAP.TILE_SIZE
+                y_off = (self.y - camera.y) * MAP.TILE_SIZE
+                bounds = self.collision.get_bounding_box(self.sprite_angle, self.sprite_origin)
+                bounds_rect = pygame.Rect(x_off + bounds[0]*MAP.TILE_SIZE, y_off + bounds[1]*MAP.TILE_SIZE, (bounds[2] - bounds[0])*MAP.TILE_SIZE, (bounds[3] - bounds[1])*MAP.TILE_SIZE)
+                pygame.draw.rect(screen, (0, 0, 0), bounds_rect, 1)
 
     def move(self, (move_x, move_y), object_list):
         """Performs collision checking and moves object by offset of
@@ -136,68 +153,54 @@ class Object:
         # Perform collision detection with objects
         if self.collision and self.collision.solid:
             # Determine current area of our collision box
-            box_origin = Vector(self.x, self.y) + Vector(self.collision.x, self.collision.y)
             if self.sprite_origin:
-                box_origin -= self.get_right() * self.sprite_origin.x / MAP.TILE_SIZE
-                box_origin -= self.get_down() * self.sprite_origin.y / MAP.TILE_SIZE
-            box_right = self.get_right() * self.collision.width
-            box_down = self.get_down() * self.collision.height
-
-            box_top_left = box_origin
-            box_top_right = box_origin + box_right
-            box_bottom_right = box_top_right + box_down
-            box_bottom_left = box_origin + box_down
+                self_box = self.collision.get_bounding_box(self.sprite_angle, tuple(self.sprite_origin), (self.x + move_x, self.y + move_y))
+            else:
+                self_box = self.collision.get_bounding_box(self.sprite_angle, (0, 0), (self.x + move_x, self.y + move_y))
 
             # Check with other objects
             for object in object_list:
                 if object == self:
                     continue  # don't collide with yourself plz
                 if not (object.collision and object.collision.solid):
-                    continue  # don't collide with nonsolids
-                obj_box_origin = Vector(object.x, object.y) + Vector(object.collision.x, object.collision.y)
+                    continue  # don't collide with non-solids
+
                 if object.sprite_origin:
-                    obj_box_origin -= object.get_right() * object.sprite_origin.x / MAP.TILE_SIZE
-                    obj_box_origin -= object.get_down() * object.sprite_origin.y / MAP.TILE_SIZE
-                obj_box_right = object.get_right() * object.collision.width
-                obj_box_down = object.get_down() * object.collision.height
+                    obj_box = object.collision.get_bounding_box(object.sprite_angle, tuple(object.sprite_origin), (object.x, object.y))
+                else:
+                    obj_box = object.collision.get_bounding_box(object.sprite_angle, (0, 0), (object.x, object.y))
 
-                obj_box_top_left = obj_box_origin
-                obj_box_top_right = obj_box_origin + obj_box_right
-                obj_box_bottom_right = obj_box_top_right + obj_box_down
-                obj_box_bottom_left = obj_box_origin + obj_box_down
-
-                for i in xrange(0, 1)
+                if not (self_box[0] >= obj_box[2] or self_box[2] <= obj_box[0] or self_box[1] >= obj_box[3] or self_box[3] <= obj_box[1]):
                     desired_x = self.x
                     desired_y = self.y
                     collided = True
-"""        if self.collision and self.collision.solid:
-            # Determine current area of our collision box
-            box_left = desired_x + self.collision.x
-            box_top = desired_y + self.collision.y
-            box_right = box_left + self.collision.width
-            box_bottom = box_top + self.collision.height
-
-            # Check with other objects
-            for object in object_list:
-                if object == self:
-                    continue  # don't collide with yourself plz
-                if not (object.collision and object.collision.solid):
-                    continue  # don't collide with nonsolids
-                obj_box_left = object.x + object.collision.x
-                obj_box_top = object.y + object.collision.y
-                obj_box_right = obj_box_left + object.collision.width
-                obj_box_bottom = obj_box_top + object.collision.height
-                if not (box_left >= obj_box_right or
-                                box_right <= obj_box_left or
-                                box_top >= obj_box_bottom or
-                                box_bottom <= obj_box_top):
-                    desired_x = self.x
-                    desired_y = self.y
-                    collided = True"""
 
         self.x = desired_x
         self.y = desired_y
         return not collided
+
+    def get_pos_at_pixel(self, (pixel_x, pixel_y)):
+        """Converts a position within the object's sprite to its exact tile position on a map. Useful with rotatable objects.
+            Arguments:
+                (pixel_x, pixel_y) (float): X and Y position in the sprite
+            Returns:
+                (Vector) The position on the map
+        """
+        if self.sprite_origin is not None:
+            if self.sprite_angle == 0.0:
+                return Vector(self.x + (float(pixel_x) - self.sprite_origin.x) / MAP.TILE_SIZE, self.y + (float(pixel_y) - self.sprite_origin.y) / MAP.TILE_SIZE)
+            else:
+                vec = Vector(self.x, self.y)
+                vec += self.get_right() * ((float(pixel_x - self.sprite_origin.x)) / MAP.TILE_SIZE)
+                vec += self.get_down() * ((float(pixel_y - self.sprite_origin.y)) / MAP.TILE_SIZE)
+                return vec
+        else:
+            if self.sprite_angle == 0.0:
+                return Vector(self.x + float(pixel_x) / MAP.TILE_SIZE, self.y + float(pixel_y) / MAP.TILE_SIZE)
+            else:
+                vec = Vector(self.x, self.y)
+                vec += self.get_right() * (float(pixel_x) / MAP.TILE_SIZE)
+                vec += self.get_down() * (float(pixel_y) / MAP.TILE_SIZE)
 
     def get_down(self):
         """Returns local 'down' Vector according to sprite rotation. Default is 0,1"""

@@ -2,7 +2,7 @@ import pygame
 
 from Objects import Object
 from Map import MAP
-from Collision import CollisionParams
+from Collision import CollisionBox
 
 
 class PikachuStatue(Object):
@@ -13,6 +13,6 @@ class PikachuStatue(Object):
         self.sprite = self.sprite.convert(24)
         self.x = x
         self.y = y
-        self.collision = CollisionParams((0.0, 0.0),
-                                         (MAP.TILE_SIZE, MAP.TILE_SIZE),
-                                         True)
+        self.collision = CollisionBox((0.0, 0.0),
+                                      (MAP.TILE_SIZE, MAP.TILE_SIZE),
+                                      True)

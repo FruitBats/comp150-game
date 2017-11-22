@@ -51,7 +51,7 @@ class DynaSword(Object):
 
         self.handle_origin = Vector(self.sprite.get_width() / 3, self.sprite.get_height())
         self.centre_origin = Vector(self.sprite.get_width() / 2, self.sprite.get_height() / 2)
-        self.collision = CollisionParams((0, 0), (self.sprite.get_width(), self.sprite.get_height()), False)
+        self.collision = CollisionBox((0, 0), (self.sprite.get_width(), self.sprite.get_height()), False)
         self.debug_render_hitbox = True
 
     def update(self, delta_time, player, object_list, map):
@@ -88,7 +88,7 @@ class DynaSword(Object):
             self.current_attack_angle = math.degrees(direction(
                                 (self.origin_x, self.origin_y),
                                 (self.mouse_x, self.mouse_y)))
-            self.sprite_angle = self.attack_angle - 90
+            self.sprite_angle = self.current_attack_angle - 90
             self.sprite_origin = self.centre_origin
         elif self.attack_state == DynaAttack.BOOMERANGING:
             # Fly through the air, meeting at self.attack_target when
