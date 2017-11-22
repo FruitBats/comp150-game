@@ -45,8 +45,7 @@ class Game:
            To be called on startup."""
         # Init Python
         pygame.init()
-        self.screen = pygame.display.set_mode((self.SCREEN_WIDTH,
-                                               self.SCREEN_HEIGHT))
+        self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
 
         pygame.display.set_caption('Frontier')
 
@@ -87,7 +86,7 @@ class Game:
         self.objects.append(Swipe(3, 3))
 
         # Init test enemy at 5,5
-        #self.objects.append(ChaserEnemy(3, 3))  # Testing with new enemy type
+        # self.objects.append(ChaserEnemy(3, 3))  # Testing with new enemy type
         self.objects.append(Enemy(3, 3, 10))
 
         # Init main game parameters
@@ -137,9 +136,8 @@ class Game:
             self.player.render(self.screen, self.camera)
 
             # Render fog
-            #self.screen.blit(self.fog.surface, ((self.player.x - self.camera.x) * MAP.TILE_SIZE - int(self.SCREEN_WIDTH*1.5 - self.player.sprite.get_width()/2),
-            #                                    (self.player.y - self.camera.y) * MAP.TILE_SIZE - int(self.SCREEN_HEIGHT*1.5 - self.player.sprite.get_height()/2)))
 
+            self.fog.render_fog(self)
             # Update inventory
             self.invent.update()
             self.invent.render_invent(self.screen)

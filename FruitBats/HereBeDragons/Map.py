@@ -31,6 +31,7 @@ class MapClass:
         total_weight = 0
         for i in MAP.TILE_INFO:
             total_weight += i[0]  # Gets the total weight if everything in MAP.TILE_INFO
+
         for y in range(0, MAP.SIZE_Y):
             for x in range(0, MAP.SIZE_X):
                 rand = random.randint(0, total_weight)
@@ -40,6 +41,7 @@ class MapClass:
                     if rand <= 0 and ndone:
                         ndone = False
                         self.map[x][y] = i
+
         self.map_render()
         self.create_sea()
         self.img = self.sea_render()
@@ -51,6 +53,7 @@ class MapClass:
             for x in range(0, MAP.SIZE_X):
                 temp_img = pygame.image.load(MAP.TILE_INFO[self.map[x][y]][1]).convert()
                 ret.blit(temp_img, (x * MAP.TILE_SIZE, y * MAP.TILE_SIZE))
+
         self.img = ret
 
     def create_sea(self):
@@ -60,6 +63,7 @@ class MapClass:
             if number == 0:  # If number is 0 change array position to True and run sea_flow_y
                 self.sea[0][y] = True
                 MapClass.sea_flow_y(self, y)
+
         for x in range(0, MAP.SIZE_X):  # Spawns sea starts on the x axis
             number = random.randint(0, MAP.SEA_CHANCE)
             if number == 0:  # If number is 0 change array position to True and run sea_flow_x
@@ -77,18 +81,23 @@ class MapClass:
                 if not y == 0:  # Don't check if at top of map
                     y -= 1
                     self.sea[x][y] = True  # Up
+
             if which_tile == 1:
                 if not y == MAP.SIZE_Y-1:  # Don't check if at bottom of map
                     y += 1
                     self.sea[x][y] = True  # Down
+
             if which_tile >= 2:
                 if not x == MAP.SIZE_X-1:  # Don't check if at right side of map
                     x += 1
                     self.sea[x][y] = True  # Right
 
     def sea_flow_x(self, x):
-        """Loops placing True in the array until hitting the edge of array,
-        randomly picks the direction starting on x axis"""
+        """
+        Loops placing True in the array until hitting the edge of array,
+        randomly picks the direction starting on x axis
+        """
+
         y = 0
         while not y >= MAP.SIZE_Y-1 and not y < 0 and not x >= MAP.SIZE_X-1 and not x < 0:
             # While not past the array boundary's
@@ -97,10 +106,12 @@ class MapClass:
                 if not x == 0:  # Don't check if at left side of map
                     x -= 1
                     self.sea[x][y] = True  # Left
+
             if which_tile == 1:
                 if not x == MAP.SIZE_X-1:  # Don't check if at right side of map'
                     x += 1
                     self.sea[x][y] = True  # Right
+
             if which_tile >= 2:
                 if not y == MAP.SIZE_Y-1:  # Don't check if at bottom of map
                     y += 1
@@ -117,6 +128,7 @@ class MapClass:
                         self.map[x][y] = -1  # Changes map array at location for sand
                         temp_sea = pygame.image.load(MAP.SEA_TILE[0][0]).convert()  # Get sand
                         surf.blit(temp_sea, ((x * MAP.TILE_SIZE), (y * MAP.TILE_SIZE)))
+
                     elif adj != 0 and adj != 1 and adj != 10 and adj != 100 and adj != 1000:  # If multiple sea connections
                         self.map[x][y] = -2  # Changes map array at location for sea
                         temp_sea = pygame.image.load(MAP.SEA_TILE[1][0]).convert()  # Get sea
