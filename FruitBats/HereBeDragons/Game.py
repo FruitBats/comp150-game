@@ -67,7 +67,7 @@ class Game:
             self.player.sprite = Sprite.deserialize("player_sprite").image
 
         # Init inventory
-        self.invent = Inventory()
+        self.invent = Inventory(self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
 
         # Init objects and player
         self.objects = list()
@@ -113,7 +113,8 @@ class Game:
                 self.delta_time = 0.1
 
             # Perform PyGame event loop
-            for event in pygame.event.get():
+            events = pygame.event.get()  # makes event.get a variable so it can be passed to other functions
+            for event in events:
                 if event.type == pygame.QUIT or \
                         (event.type == pygame.KEYDOWN and
                          event.key == pygame.K_ESCAPE):
@@ -137,8 +138,8 @@ class Game:
             self.fog.render_fog(self)
 
             # Update inventory
-            self.invent.update()
-            self.invent.render_invent(self.screen)
+            self.invent.update(events)
+            self.invent.render_invent(self.screen, self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
 
             # Splat to screen
             pygame.display.flip()
