@@ -15,17 +15,18 @@ from Camera import Camera
 from Menu import *
 from Invent import *
 from Fog import Fog
-from Helpers import Vector
-from Projectiles import Arrow
 
+from Characters import Character
+from Health import *
+from Projectiles import Arrow
+from Helpers import Vector
 from SpriteGeneration import character_creation
 from SpriteGeneration import Sprite
 
 
 class Game:
     delta_time = 0  # time passed since last frame
-    tick_time = 0   # time at the start of the frame, in seconds since
-                    # the game started
+    tick_time = 0   # time at the start of the frame, in seconds since the game started
     start_time = 0  # initial time.clock() value on startup (OS-dependent)
     t0 = time.time()
     screen = None   # PyGame screen
@@ -35,8 +36,8 @@ class Game:
     map = None      # MapClass object
     quitting = False
     menu = None
-    SCREEN_WIDTH = 800  # 640
-    SCREEN_HEIGHT = 600  # 480
+    SCREEN_WIDTH = 800  # defines screen width
+    SCREEN_HEIGHT = 600  # defines screen height
 
     new_game = True    # If the player needs to create a character or not. For testing only currently.
 
@@ -50,7 +51,7 @@ class Game:
         pygame.init()
         self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
 
-        pygame.display.set_caption('Frontier')
+        pygame.display.set_caption('You can write a funny joke here, LUL!')
 
         menu = GameMenu(self.screen)
         menu.run()
@@ -66,12 +67,15 @@ class Game:
         self.fog = Fog()
 
         # Init character
-        self.player = Player(0, 0)
+        self.player = Player(0, 0, self.map)
         if Sprite.deserialize("player_sprite") is not None:
             self.player.sprite = Sprite.deserialize("player_sprite").image
 
         # Init inventory
-        self.invent = Inventory()
+        self.invent = Inventory(self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
+
+        # Init health
+        self.health = CurrentHealth()
 
         # Init objects and player
         self.objects = list()
@@ -82,16 +86,13 @@ class Game:
 
         # Add test Pikachi (Pikachodes?) (plural?)
         for i in xrange(10):
-            pika = PikachuStatue(random.randint(0, 10), random.randint(0, 10))
-            self.objects.append(pika)
-            pika.debug_render_hitbox = True
-        # Add test sword
+            self.objects.append(PikachuStatue(random.randint(0, 10),
+                                              random.randint(0, 10)))        # Add test sword
         self.objects.append(Swipe(3, 3))
 
-        # Init test enemy at 5,5
         # self.objects.append(ChaserEnemy(3, 3))  # Testing with new enemy type
-        #self.objects.append(Enemy(3, 3, 10))
-
+        # self.objects.append(ChaserEnemy(3, 3, self.map))  # Testing with new enemy type
+        # self.objects.append(Enemy(3, 3, 10, self.map))
         # Init main game parameters
         self.start_time = time.clock()
         self.delta_time = 0.0
@@ -119,7 +120,8 @@ class Game:
                 self.delta_time = 0.1
 
             # Perform PyGame event loop
-            for event in pygame.event.get():
+            events = pygame.event.get()  # makes event.get a variable so it can be passed to other functions
+            for event in events:
                 if event.type == pygame.QUIT or \
                         (event.type == pygame.KEYDOWN and
                          event.key == pygame.K_ESCAPE):
@@ -139,9 +141,16 @@ class Game:
                 obj.render(self.screen, self.camera)
             self.player.render(self.screen, self.camera)
 
+
             # Render fog
             #self.fog.render_fog(self)
 
+            # Draw health bar
+            self.health.update()
+            self.screen.blit(self.health.health_bar, (5, 5))
+            for health1 in range(self.health.current_health):
+                self.screen.blit(self.health.health, (health1 + 7, 7))
+            print self.health.current_health
             # Test fire arrow
             fire_time -= self.delta_time
             if fire_time <= 0:
@@ -151,11 +160,12 @@ class Game:
                 spawn_pos = (self.player.x + math.sin(math.radians(ang)) * distance, self.player.y + math.cos(math.radians(ang)) * distance)
                 velocity = Vector(0, 0)
                 velocity.point_at_angle(ang - 180, 5)
-                self.objects.append(Arrow(spawn_pos, tuple(velocity), ang))
-
-            # Update inventory
-            self.invent.update()
-            self.invent.render_invent(self.screen)
+                self.objects.append(Arrow(spawn_pos, tuple(velocity), ang, self.map))
+            # Update inventory and render
+            self.invent.update(events)
+            self.invent.render_invent(self.screen, self.SCREEN_WIDTH, self.SCREEN_HEIGHT)            
+            
+            # print("Player location: " + str(self.player.x) + ", " + str(self.player.y))
 
             # Splat to screen
             pygame.display.flip()

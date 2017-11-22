@@ -16,13 +16,15 @@ class Object:
     sprite_angle = 0  # angle of rotation for this sprite in degrees
     sprite_origin = None  # origin of sprite
     debug_render_hitbox = False  # whether to render the hitbox (for debugging)
-    debug_dyna = None
 
-    def __init__(self, x, y):
+    parent_map = None # The map the object is created on
+    debug_dyna = None
+    def __init__(self, x, y, parent_map):
         """Initialise object at the given position"""
         self.x = x
         self.y = y
         self.collision = CollisionBox((0.0, 0.0), (1.0, 1.0), True)
+        self.parent_map = parent_map
 
     def update(self, delta_time, player, object_list, map):
         self.debug_dyna = player.dynasword
@@ -175,8 +177,35 @@ class Object:
                     desired_y = self.y
                     collided = True
 
+        # Map Collision detection
+        # Create player's collision box
+        box_left = desired_x + self.collision.x
+        box_top = desired_y + self.collision.y
+        box_right = box_left + self.collision.width
+        box_bottom = box_top + self.collision.height
+
+        # Check walkable for all tiles surrounding player.
+        for x in xrange(int(math.floor(box_left)), int(math.ceil(box_right) + 1)):
+            for y in xrange(int(math.floor(box_top)), int(math.ceil(box_bottom)+ 1)):
+                if MapClass.is_walkable(self.parent_map, x, y):
+                    pass
+
+                else:
+                    # Create tile's collision box
+                    tile_box_left = x
+                    tile_box_top = y
+                    tile_box_right = x + 1
+                    tile_box_bottom = y + 1
+
+                    # Check collision
+                    if not (box_left >= tile_box_right or box_right <= tile_box_left or box_top >= tile_box_bottom or box_bottom <= tile_box_top):
+                        desired_x = self.x
+                        desired_y = self.y
+                        self.collided = True
+
         self.x = desired_x
         self.y = desired_y
+
         return not collided
 
     def get_pos_at_pixel(self, (pixel_x, pixel_y)):

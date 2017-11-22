@@ -9,12 +9,13 @@ class Arrow(Object):
     tilt_angle = 0
     deflected = False
 
-    def __init__(self, (x, y), (x_velocity, y_velocity), angle):
+    def __init__(self, (x, y), (x_velocity, y_velocity), angle, parent_map):
         """Initialises an arrow projectile
             Arguments:
                 (x, y) (float): Position to spawn arrow, in tiles
                 (x_velocity, y_velocity) (float): Velocity of arrow on spawn, in tiles/sec
                 angle (float): Initial angle of the arrow in degrees
+                parent_map (MapClass): Map that owns this object (urgh)
         """
         self.x = float(x)
         self.y = float(y)
@@ -24,6 +25,7 @@ class Arrow(Object):
         self.sprite_origin = Vector(6, 0)
         self.velocity = Vector(x_velocity, y_velocity)
         self.life_time = self.start_life_time
+        self.parent_map = parent_map
 
         if math.sin(math.radians(angle)) < 0:
             self.tilt_angle = 30
