@@ -22,8 +22,7 @@ from SpriteGeneration import Sprite
 
 class Game:
     delta_time = 0  # time passed since last frame
-    tick_time = 0   # time at the start of the frame, in seconds since
-                    # the game started
+    tick_time = 0   # time at the start of the frame, in seconds since the game started
     start_time = 0  # initial time.clock() value on startup (OS-dependent)
     t0 = time.time()
     screen = None   # PyGame screen
@@ -33,8 +32,8 @@ class Game:
     map = None      # MapClass object
     quitting = False
     menu = None
-    SCREEN_WIDTH = 800  # 640
-    SCREEN_HEIGHT = 600  # 480
+    SCREEN_WIDTH = 800  # defines screen width
+    SCREEN_HEIGHT = 600  # defines screen height
 
     new_game = True    # If the player needs to create a character or not. For testing only currently.
 
@@ -46,8 +45,7 @@ class Game:
            To be called on startup."""
         # Init Python
         pygame.init()
-        self.screen = pygame.display.set_mode((self.SCREEN_WIDTH,
-                                               self.SCREEN_HEIGHT))
+        self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
 
         pygame.display.set_caption('You can write a funny joke here, LUL!')
 
@@ -65,12 +63,12 @@ class Game:
         self.fog = Fog()
 
         # Init character
-        self.player = Player(0, 0)
+        self.player = Player(0, 0, self.map)
         if Sprite.deserialize("player_sprite") is not None:
             self.player.sprite = Sprite.deserialize("player_sprite").image
 
         # Init inventory
-        self.invent = Inventory()
+        self.invent = Inventory(self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
 
         # Init health
         self.health = CurrentHealth()
@@ -84,14 +82,14 @@ class Game:
 
         # Add test Pikachi (Pikachodes?) (plural?)
         for i in xrange(10):
-            self.objects.append(PikachuStatue(random.randint(0, 10),
-                                              random.randint(0, 10)))
+            self.objects.append(PikachuStatue(random.randint(0, 10), random.randint(0, 10)))
+
         # Add test sword
         self.objects.append(Swipe(3, 3))
 
-        # Init test enemy at 5,5
-        #self.objects.append(ChaserEnemy(3, 3))  # Testing with new enemy type
-        self.objects.append(Enemy(3, 3, 10))
+        # Init test enemy
+        # self.objects.append(ChaserEnemy(3, 3, self.map))  # Testing with new enemy type
+        self.objects.append(Enemy(3, 3, 10, self.map))
 
         # Init main game parameters
         self.start_time = time.clock()
@@ -119,7 +117,8 @@ class Game:
                 self.delta_time = 0.1
 
             # Perform PyGame event loop
-            for event in pygame.event.get():
+            events = pygame.event.get()  # makes event.get a variable so it can be passed to other functions
+            for event in events:
                 if event.type == pygame.QUIT or \
                         (event.type == pygame.KEYDOWN and
                          event.key == pygame.K_ESCAPE):
@@ -141,8 +140,7 @@ class Game:
 
 
             # Render fog
-            self.screen.blit(self.fog.surface, ((self.player.x - self.camera.x) * MAP.TILE_SIZE - int(self.SCREEN_WIDTH*1.5 - self.player.sprite.get_width()/2),
-                                                (self.player.y - self.camera.y) * MAP.TILE_SIZE - int(self.SCREEN_HEIGHT*1.5 - self.player.sprite.get_height()/2)))
+            self.fog.render_fog(self)
 
             # Draw health bar
             self.health.update()
@@ -151,9 +149,9 @@ class Game:
                 self.screen.blit(self.health.health, (health1 + 7, 7))
             print self.health.current_health
 
-            # Update inventory
-            self.invent.update()
-            self.invent.render_invent(self.screen)
+            # Update inventory and render
+            self.invent.update(events)
+            self.invent.render_invent(self.screen, self.SCREEN_WIDTH, self.SCREEN_HEIGHT)            # print("Player location: " + str(self.player.x) + ", " + str(self.player.y))
 
             # Splat to screen
             pygame.display.flip()
