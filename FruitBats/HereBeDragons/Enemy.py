@@ -12,12 +12,13 @@ class ChaserEnemy(Character):
     velocity = None  # current speed, as a Vector
     chasing = False  # whether currently chasing the player or not
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, parent_map):
         self.x = float(x)
         self.y = float(y)
         self.collision = CollisionParams((10, 1), (39, 72), True)
         self.sprite = pygame.image.load("graphics/enemy.png")
         self.velocity = Vector(0, 0)
+        self.parent_map = parent_map
 
     def update(self, delta_time, player, object_list, map):
         # Check if the player is in range
@@ -56,7 +57,7 @@ class Enemy(Character):
     player_y = 0
     player_distance = 0
 
-    def __init__(self, x, y, hitpoints):
+    def __init__(self, x, y, hitpoints, parent_map):
 
         """
         Constructor
@@ -73,6 +74,7 @@ class Enemy(Character):
         self.collision = CollisionParams((10, 1), (39, 72), True)
         self.sprite = pygame.image.load("graphics/enemy.png")
         self.velocity = Vector(0, 0)
+        self.parent_map = parent_map
 
     def update(self, delta_time, player, object_list, map):
 
