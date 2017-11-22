@@ -6,7 +6,7 @@ import pygame
 
 # Project imports
 from Characters import Character
-from Map import MapClass
+from Map import *
 from Collision import CollisionParams
 from Helpers import *
 from DynaSword import DynaSword
@@ -45,7 +45,6 @@ class Player(Character):
     def update_movement(self, delta_time, player, object_list, map):
         # Perform character movement
         key_pressed = pygame.key.get_pressed()
-
         # Make a normalised vector of movement based on user input
         move_x = 0.0
         move_y = 0.0

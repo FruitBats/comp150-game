@@ -13,6 +13,8 @@ from Camera import Camera
 from Menu import *
 from Invent import *
 from Fog import Fog
+from Characters import Character
+from Health import *
 
 from SpriteGeneration import character_creation
 from SpriteGeneration import Sprite
@@ -47,7 +49,7 @@ class Game:
         self.screen = pygame.display.set_mode((self.SCREEN_WIDTH,
                                                self.SCREEN_HEIGHT))
 
-        pygame.display.set_caption('Frontier')
+        pygame.display.set_caption('You can write a funny joke here, LUL!')
 
         menu = GameMenu(self.screen)
         menu.run()
@@ -69,6 +71,9 @@ class Game:
 
         # Init inventory
         self.invent = Inventory()
+
+        # Init health
+        self.health = CurrentHealth()
 
         # Init objects and player
         self.objects = list()
@@ -134,9 +139,17 @@ class Game:
                 obj.render(self.screen, self.camera)
             self.player.render(self.screen, self.camera)
 
+
             # Render fog
             self.screen.blit(self.fog.surface, ((self.player.x - self.camera.x) * MAP.TILE_SIZE - int(self.SCREEN_WIDTH*1.5 - self.player.sprite.get_width()/2),
                                                 (self.player.y - self.camera.y) * MAP.TILE_SIZE - int(self.SCREEN_HEIGHT*1.5 - self.player.sprite.get_height()/2)))
+
+            # Draw health bar
+            self.health.update()
+            self.screen.blit(self.health.health_bar, (5, 5))
+            for health1 in range(self.health.current_health):
+                self.screen.blit(self.health.health, (health1 + 7, 7))
+            print self.health.current_health
 
             # Update inventory
             self.invent.update()
