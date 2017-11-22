@@ -151,7 +151,9 @@ class Game:
 
             # Update inventory and render
             self.invent.update(events)
-            self.invent.render_invent(self.screen, self.SCREEN_WIDTH, self.SCREEN_HEIGHT)            # print("Player location: " + str(self.player.x) + ", " + str(self.player.y))
+            self.invent.render_invent(self.screen, self.SCREEN_WIDTH, self.SCREEN_HEIGHT)            
+            
+            # print("Player location: " + str(self.player.x) + ", " + str(self.player.y))
 
             # Splat to screen
             pygame.display.flip()
