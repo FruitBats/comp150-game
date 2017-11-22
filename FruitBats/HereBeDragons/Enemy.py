@@ -5,7 +5,7 @@ from Helpers import *
 from Collision import CollisionParams
 from DynaSword import DynaSword
 
-
+# Old enemy class
 class ChaserEnemy(Character):
     detection_range = 5  # range, in tiles, before engaging with player
     acceleration = 20  # rate of acceleration, in tiles/sec/sec
@@ -40,12 +40,14 @@ class ChaserEnemy(Character):
         if not self.move(self.velocity * delta_time, object_list):
             self.velocity = Vector(0, 0)
 
+
+# New enemy class under testing
 class Enemy(Character):
 
     """Testing new enemies - Mango"""
 
     detection_range = 5  # range, in tiles, before engaging with player
-    attack_range = 2 # range, in tiles, before using an attack
+    attack_range = 2  # range, in tiles, before using an attack
     acceleration = 20  # rate of acceleration, in tiles/sec/sec
     velocity = None  # current speed, as a Vector
     chasing = False  # whether currently chasing the player or not
@@ -126,9 +128,6 @@ class Enemy(Character):
         self.dynasword2.mouse_x = self.player_x
         self.dynasword2.mouse_y = self.player_y
         self.dynasword2.attack()
-
-    def die(self):
-        pass # Enemy should "die"
 
     def chase_player(self, delta_time, player, object_list, map):
         # Check if the player is in range

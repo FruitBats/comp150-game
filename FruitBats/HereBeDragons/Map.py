@@ -122,13 +122,17 @@ class MapClass:
     def sea_flow_y(self, y):
         """
         Loops placing True in the array until hitting the edge of array.
-        Randomly picks the direction starting on y axis
+        Randomly picks the direction starting on y axis.
+
+        Args:
+            y (int): y position of sea tile being placed
         """
 
         x = 0
         while not x >= MAP.SIZE_X-1 and not x < 0 and not y >= MAP.SIZE_Y-1 and not y < 0:
             # While not past the array boundary's
             which_tile = random.randint(0, 3)  # Random int used to pick which direction
+
             if which_tile == 0:
                 if not y == 0:  # Don't check if at top of map
                     y -= 1
@@ -148,12 +152,16 @@ class MapClass:
         """
         Loops placing True in the array until hitting the edge of array.
         Randomly picks the direction starting on x axis.
+
+        Args:
+            x (int): x position of sea tile being placed
         """
 
         y = 0
         while not y >= MAP.SIZE_Y-1 and not y < 0 and not x >= MAP.SIZE_X-1 and not x < 0:
             # While not past the array boundary's
             which_tile = random.randint(0, 3)  # Random int used to pick which direction
+
             if which_tile == 0:
                 if not x == 0:  # Don't check if at left side of map
                     x -= 1
