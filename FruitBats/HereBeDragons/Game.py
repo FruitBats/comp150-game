@@ -62,7 +62,7 @@ class Game:
         self.fog = Fog()
 
         # Init character
-        self.player = Player(0, 0)
+        self.player = Player(0, 0, self.map)
         if Sprite.deserialize("player_sprite") is not None:
             self.player.sprite = Sprite.deserialize("player_sprite").image
 
@@ -78,14 +78,14 @@ class Game:
 
         # Add test Pikachi (Pikachodes?) (plural?)
         for i in xrange(10):
-            self.objects.append(PikachuStatue(random.randint(0, 10),
-                                              random.randint(0, 10)))
+            self.objects.append(PikachuStatue(random.randint(0, 10), random.randint(0, 10)))
+
         # Add test sword
         self.objects.append(Swipe(3, 3))
 
-        # Init test enemy at 5,5
-        # self.objects.append(ChaserEnemy(3, 3))  # Testing with new enemy type
-        self.objects.append(Enemy(3, 3, 10))
+        # Init test enemy
+        # self.objects.append(ChaserEnemy(3, 3, self.map))  # Testing with new enemy type
+        self.objects.append(Enemy(3, 3, 10, self.map))
 
         # Init main game parameters
         self.start_time = time.clock()
@@ -139,6 +139,8 @@ class Game:
             # Update inventory
             self.invent.update()
             self.invent.render_invent(self.screen)
+
+            # print("Player location: " + str(self.player.x) + ", " + str(self.player.y))
 
             # Splat to screen
             pygame.display.flip()
