@@ -39,7 +39,7 @@ class Game:
     SCREEN_WIDTH = 800  # defines screen width
     SCREEN_HEIGHT = 600  # defines screen height
 
-    new_game = True    # If the player needs to create a character or not. For testing only currently.
+    new_game = False#True    # If the player needs to create a character or not. For testing only currently.
 
     def __init__(self):
         self.run()
@@ -56,8 +56,10 @@ class Game:
         menu = GameMenu(self.screen)
         menu.run()
 
+        self.new_game = menu.new_game
+
+        # Init character creation screen if new game is started
         if self.new_game:
-            # Character creation goes here
             character_creation.load_creation_window(self.screen)
 
         # Init map

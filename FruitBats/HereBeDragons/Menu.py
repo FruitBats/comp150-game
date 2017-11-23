@@ -40,6 +40,7 @@ class GameMenu:
 
     running = True
     background_image = None
+    new_game = False
 
     def __init__(self, screen, font=None,
                  font_size=30, font_color=WHITE):
@@ -54,6 +55,7 @@ class GameMenu:
 
         self.clock = pygame.time.Clock()
         self.funcs = {"New Game": GameMenu.start_pressed,
+                      "Continue Game": GameMenu.continue_pressed,
                       "Quit": GameMenu.quit_pressed}
         self.items = []
         key_list = self.funcs.keys()
@@ -72,6 +74,11 @@ class GameMenu:
         self.cur_item = None
 
     def start_pressed(self):
+        self.new_game = True
+        self.running = False
+
+    def continue_pressed(self):
+        self.new_game = False
         self.running = False
 
     def quit_pressed(self):
