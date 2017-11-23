@@ -23,6 +23,7 @@ from Helpers import Vector
 from SpriteGeneration import character_creation
 from SpriteGeneration import Sprite
 
+from Objects import *
 
 class Game:
     delta_time = 0  # time passed since last frame
@@ -39,6 +40,8 @@ class Game:
     SCREEN_WIDTH = 800  # defines screen width
     SCREEN_HEIGHT = 600  # defines screen height
     game_over = False
+
+    fog_enabled = True  # Enable or disbale fog for testing
 
     def __init__(self):
         self.run()
@@ -84,10 +87,10 @@ class Game:
             # Perform PyGame event loop
             events = pygame.event.get()  # makes event.get a variable so it can be passed to other functions
             for event in events:
-                if event.type == pygame.QUIT or \
-                        (event.type == pygame.KEYDOWN and
-                         event.key == pygame.K_ESCAPE):
+                if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                     self.quitting = True
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_f:
+                    self.fog_enabled = not self.fog_enabled
 
             # Checks if the player's is dead to call game over screen
             if self.health.current_health <= 0:
@@ -108,9 +111,9 @@ class Game:
                 obj.render(self.screen, self.camera)
             self.player.render(self.screen, self.camera)
 
-
             # Render fog
-            self.fog.render(self)
+            if self.fog_enabled:
+                self.fog.render(self)
 
             # Draw health bar
             self.health.update()
@@ -123,17 +126,14 @@ class Game:
             fire_time -= self.delta_time
             if fire_time <= 0:
                 fire_time = 1
-                distance = 3
-                ang = float(random.randrange(0, 360, 1))
+                distance = 4
+                ang = random.randrange(0, 360, 1)
                 spawn_pos = (self.player.x + math.sin(math.radians(ang)) * distance, self.player.y + math.cos(math.radians(ang)) * distance)
-                velocity = Vector(0, 0)
-                velocity.point_at_angle(ang - 180, 5)
-                self.objects.append(Arrow(spawn_pos, tuple(velocity), ang, self.map))
+                self.objects.append(Arrow(spawn_pos, (self.player.x, self.player.y), random.randrange(4, 6, 1), self.map))
+
             # Update inventory and render
             self.invent.update(events)
-            self.invent.render_invent(self.screen, self.SCREEN_WIDTH, self.SCREEN_HEIGHT)            
-            
-            # print("Player location: " + str(self.player.x) + ", " + str(self.player.y))
+            self.invent.render_invent(self.screen, self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
 
             # Splat to screen
             pygame.display.flip()
@@ -180,7 +180,7 @@ class Game:
         self.fog = Fog(self.t0, 10, 5)
 
         # Init character
-        self.player = Player(0, 0, self.map)
+        self.player = Player(1, 1, self.map)
         if Sprite.deserialize("player_sprite") is not None:
             self.player.sprite = Sprite.deserialize("player_sprite").image
 

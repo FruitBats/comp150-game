@@ -5,6 +5,7 @@ from Helpers import *
 from Collision import CollisionBox
 from DynaSword import DynaSword
 
+
 # Old enemy class
 class ChaserEnemy(Character):
     detection_range = 5  # range, in tiles, before engaging with player
@@ -19,6 +20,8 @@ class ChaserEnemy(Character):
         self.sprite = pygame.image.load("graphics/enemy.png")
         self.velocity = Vector(0, 0)
         self.parent_map = parent_map
+        self.hand_x = 33
+        self.hand_y = 48
 
     def update(self, delta_time, player, object_list, map):
         # Check if the player is in range
@@ -31,10 +34,9 @@ class ChaserEnemy(Character):
         # Chase the player if close
         if self.chasing:
             to_player = Vector(player.x - self.x, player.y - self.y)
+            to_player.normalise(delta_time * self.acceleration * (1 - player_distance / self.detection_range))
 
-            self.velocity += to_player.normalise(
-                delta_time * self.acceleration
-                * (1 - player_distance / self.detection_range))
+            self.velocity += to_player
 
         # Move according to velocity
         if not self.move(self.velocity * delta_time, object_list):

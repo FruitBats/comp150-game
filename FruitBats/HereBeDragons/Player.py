@@ -12,100 +12,99 @@ from Helpers import *
 from DynaSword import DynaSword
 
 
+class PlayerState:
+    ALIVE = 0
+    DEAD = 1
+
+
 class Player(Character):
-    max_speed = 7.0  # The maximum running speed, in tiles/sec
-    acceleration = 35.0  # Rate of acceleration while running, in tiles/sec/sec
-    friction = 90.0  # Rate of slowdown when releasing movement keys
-    x_velocity = 0.0  # Rate of movement per axis in tiles/sec
-    y_velocity = 0.0
-    dynasword = None  # Pointer to dynasword
+    state = PlayerState.ALIVE  # (PlayerState const) Current state
+    max_speed = 7.0  # (float) The maximum running speed, in tiles/sec
+    acceleration = 35.0  # (float) Rate of acceleration while running, in tiles/sec/sec
+    friction = 70.0  # (float) Rate of slowdown when releasing movement keys
+    velocity = None  # (Vector) Rate of movement per axis in tiles/sec
+    dynasword = None  # (DynaSword) Pointer to dynasword
+    respawn_timer = 0  # (float) Current time til respawn in seconds
 
     def __init__(self, x, y, parent_map):
         """Init: Loads default player sprite and scales it up"""
         # Load character image
         self.sprite = pygame.image.load('graphics/game_character.png')
-        # Scale character so we can see his beauty
-        #self.sprite = pygame.transform.smoothscale(
-        #                self.sprite,
-        #                (MapClass.TILE_SIZE, MapClass.TILE_SIZE))
-        self.x = x
-        self.y = y
         self.parent_map = parent_map
 
-        self.size = self.sprite.get_size()
-        # self.sprite_origin = (self.size[0] / 2), (self.size[1] / 2)    # Wasn't sure if origin should be set here or not.
+        # Setup collision box and sprite origin
+        size = (64, 64)  # Kind of a hack
+        self.sprite_origin = Vector((size[0] / 2), (size[1] / 2))
+        self.collision = CollisionBox((5, 5), (size[0] - 10, size[1] - 10), True)
+        self.hand_x = 4
+        self.hand_y = 52
 
-        # self.collision = CollisionParams((10, 1), (39, 72), True)
-        self.collision = CollisionBox((0 + 10, 0 + 10), (self.size[0] - 20, self.size[1] - 20), True)
+        # Do initial spawn
+        self.spawn_x = x
+        self.spawn_y = y
+
+        self.respawn()
+
+        # Reposition
+        self.debug_render_hitbox = True
 
     def update(self, delta_time, player, object_list, map):
-        # Perform updates
-        self.update_movement(delta_time, player, object_list, map)
-        self.update_attacks(delta_time, player, object_list, map)
+        if self.state == PlayerState.ALIVE:
+            # Perform updates
+            self.update_movement(delta_time, player, object_list, map)
+            self.update_attacks(delta_time, player, object_list, map)
+        else:
+            # Initiate beauty
+            self.update_majestic_death_animation(delta_time, player, object_list, map)
 
     def update_movement(self, delta_time, player, object_list, map):
         # Perform character movement
         key_pressed = pygame.key.get_pressed()
+
         # Make a normalised vector of movement based on user input
-        move_x = 0.0
-        move_y = 0.0
+        move = Vector(0.0, 0.0)
+
         if key_pressed[pygame.K_w]:
-            move_y -= 1.0
+            move.y -= 1.0
         if key_pressed[pygame.K_s]:
-            move_y += 1.0
+            move.y += 1.0
         if key_pressed[pygame.K_d]:
-            move_x += 1.0
+            move.x += 1.0
         if key_pressed[pygame.K_a]:
-            move_x -= 1.0
+            move.x -= 1.0
 
-        vec_length = distance((0, 0), (move_x, move_y))
-        # If the movement vector is nonzero, move; otherwise do friction
-        # todo: determine why 'if vec_length is not 0.0' didn't work correctly
-        if vec_length > 0.000:
-            # Normalise
-            move_x /= vec_length
-            move_y /= vec_length
+        # If the movement vector is nonzero, stretch it by the player's acceleration factor to move; otherwise, change it to an opposite vector for friction
+        move_length = move.length()
+        current_speed = self.velocity.length()
 
-            # Accelerate according to the direction of the vector
-            self.x_velocity += move_x * self.acceleration * delta_time
-            self.y_velocity += move_y * self.acceleration * delta_time
+        # Do player acceleration
+        if move_length > 0.000:
+            # Scale movement vector to acceleration speed
+            move.normalise(self.acceleration + self.friction)  # + deceleration to fight the friction that immediately follows
 
-            # Cap player max speed
-            current_speed = distance((0, 0), (self.x_velocity, self.y_velocity))
-            if current_speed > self.max_speed:
-                self.x_velocity *= self.max_speed / current_speed
-                self.y_velocity *= self.max_speed / current_speed
-        else:
-            # Normalise to friction speed at max
-            current_speed = distance((0, 0),
-                                     (self.x_velocity, self.y_velocity))
-            decel_speed = self.friction  # speed of deceleration
+        # Do player deceleration
+        deceleration_speed = self.friction
 
-            # If the player is moving slower than the friction rate,
-            # cut the deceleration rate down to simply cancel out movement
-            if current_speed < decel_speed * delta_time:
-                decel_speed = current_speed / delta_time
+        # Cap the deceleration speed to <= current_speed (to avoid boosting in the opposite direction!)
+        if current_speed < deceleration_speed * delta_time:
+            deceleration_speed = current_speed / delta_time
 
-            if current_speed > 0:
-                move_x = -self.x_velocity * decel_speed / current_speed
-                move_y = -self.y_velocity * decel_speed / current_speed
+        if current_speed > 0:
+            move -= self.velocity * (deceleration_speed / self.velocity.length())
 
-            # Decelerate accordingly
-            self.x_velocity += move_x * delta_time
-            self.y_velocity += move_y * delta_time
+        # Accelerate or decelerate accordingly
+        self.velocity += move * delta_time
+
+        # Cap player speed
+        if self.velocity.length() > self.max_speed:
+            self.velocity.normalise(self.max_speed)
 
         # Move player by velocity
-        moved = self.move((self.x_velocity * delta_time,
-                           self.y_velocity * delta_time),
-                          object_list)
-
-        if self.sprite_angle >= 360:
-            self.sprite_angle -= 360
+        moved = self.move(tuple(self.velocity * delta_time), object_list)
 
         # Stop velocity if player collided with something
         if not moved:
-            self.x_velocity = 0
-            self.y_velocity = 0
+            self.velocity = Vector(0, 0)
 
     def update_attacks(self, delta_time, player, object_list, map):
         # Create sword
@@ -122,3 +121,34 @@ class Player(Character):
             self.dynasword.block()
         if pygame.mouse.get_pressed()[1]:
             self.dynasword.boomerang()
+
+    def update_majestic_death_animation(self, delta_time, player, object_list, map):
+        """Fly majestically. See Object.update for argument info"""
+        self.sprite_angle += 1400 * delta_time
+        self.move(tuple(self.velocity * delta_time), object_list)
+
+        self.respawn_timer -= delta_time
+        if self.respawn_timer <= 0:
+            # Respawn
+            self.respawn()
+
+    def die(self):
+        """Called on player death"""
+        if self.state == PlayerState.ALIVE:
+            # Change player state to dead, reconstruct that famous Titanic scene and and setup respawn variables
+            self.state = PlayerState.DEAD
+            self.respawn_timer = 1
+            self.velocity.point_at_angle(random.randrange(0, 360), 10)
+            self.collision.solid = False
+
+    def respawn(self):
+        """Respawn function, automatically called after a player has died"""
+        self.max_health = 1
+        self.health = self.max_health
+        self.state = PlayerState.ALIVE
+        self.respawn_timer = 0
+        self.x = self.spawn_x
+        self.y = self.spawn_y
+        self.sprite_angle = 0
+        self.velocity = Vector(0, 0)
+        self.collision.solid = True
