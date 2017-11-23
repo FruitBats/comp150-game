@@ -3,7 +3,6 @@ import pickle
 
 
 class Sprite:
-
     """
     Sprite Class. This class contains methods for drawing, updating and saving a sprite as a single image. Needs a render function!
 
@@ -13,10 +12,8 @@ class Sprite:
 
     # The image used for the sprite
     image = None
-    components = []
 
     def __init__(self, size, background_colour, base, legs, body, hair, feet, weapon):
-
         """
         Constructor for sprite class.
 
@@ -42,12 +39,9 @@ class Sprite:
         self.feet = feet
         self.weapon = weapon
 
-        print("Sprite body is " + str(self.body))
-
         self.sprite_base = pygame.Surface(self.size, pygame.SRCALPHA, 32)
 
     def draw(self):
-
         """Draws the sprite's component images onto a PyGame surface and assigns it to the image property."""
 
         # clear surface
@@ -62,7 +56,6 @@ class Sprite:
         self.image = self.sprite_base
 
     def draw_with_position(self, base_pos, body_pos, legs_pos, head_pos):
-
         """
         Draws the sprite's component images onto a PyGame surface at
         specified positions and assigns the surface to the image property.
@@ -84,13 +77,13 @@ class Sprite:
         self.image = self.sprite_base
 
     def update(self, to_update, new_values, draw=True):
-
         """
         Updates the sprite image. Can be called with multiple values to change at once.
 
         Args:
             to_update (list of strings): The components to change, referencing the sprite properties.
-            new_values (list of images): The new images for the components being changed .
+            new_values (list of images): The new images for the components being changed.
+            draw (Bool, optional): If the sprite should be drawn to screen once updated. Defaults to True.
         """
 
         for i in range (0, len(to_update)):
@@ -100,6 +93,13 @@ class Sprite:
             self.draw()
 
     def resize(self, size):
+        """
+        Resizes each component image of the sprite to a new size
+
+        Args:
+            size (tuple): The new size of the sprite.
+        """
+
         self.size = size
         self.image = pygame.transform.scale(self.image, size)
         self.base = pygame.transform.scale(self.base, size)
@@ -112,7 +112,6 @@ class Sprite:
         self.sprite_base = pygame.transform.scale(self.sprite_base, size)
 
     def save_with_id(self, save_path, file_type):
-
         """
         Saves the sprite image to file with a unique name and records the name used in a text document.
         Whenever a sprite is saved the text document is checked to ensure that the same name is not used twice.
@@ -136,7 +135,6 @@ class Sprite:
 
     @staticmethod
     def serialize(file, to_pickle):
-
         """
         Serialize (pickle) a Sprite instance. Because pygame Surfaces cannot be pickled,
         each surface is converted to a string prior to pickling.
@@ -164,7 +162,6 @@ class Sprite:
 
     @staticmethod
     def deserialize(file):
-
         """
         Deserialize (unpickle) a Sprite instance. As the Surfaces are pickled as strings, they must be converted back to
         Surfaces after unpickling.
@@ -185,11 +182,12 @@ class Sprite:
             loaded_sprite.legs = pygame.image.fromstring(loaded_sprite.legs, loaded_sprite.size, "RGBA")
             loaded_sprite.body = pygame.image.fromstring(loaded_sprite.body, loaded_sprite.size, "RGBA")
             loaded_sprite.hair = pygame.image.fromstring(loaded_sprite.hair, loaded_sprite.size, "RGBA")
-            loaded_sprite.feet = pygame.image.fromstring(loaded_sprite.feet, loaded_sprite.size, "RGBA")            # No component set for feet therefore size has not been scaled up
+            loaded_sprite.feet = pygame.image.fromstring(loaded_sprite.feet, loaded_sprite.size, "RGBA")
 
             loaded_sprite.sprite_base = pygame.image.fromstring(loaded_sprite.sprite_base, loaded_sprite.size, "RGBA")
 
             return loaded_sprite
+
         except IOError:
             print("No player save found.")
 

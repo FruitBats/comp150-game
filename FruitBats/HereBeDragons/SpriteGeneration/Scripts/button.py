@@ -4,13 +4,12 @@ import pygame
 class Button:
 
     """
-    Button Class. This class creates a simple button that can be passed a function to execute when clicked.
+    Button Class. This class creates a simple button that can be passed multiple functions to execute when clicked.
 
     Attributes:
         button (pygame.Surface): The surface used to represent the button.
         button_bounds (pygame.Rect): The rectangle formed by the button.
         parent_surface (pygame.Surface): The surface onto which to blit the button.
-        button_args (list): The arguments to be passed to the function called in on_click.
     """
 
     button = None
@@ -18,7 +17,6 @@ class Button:
     parent_surface = None
 
     def __init__(self, size, position, colour, parent_surface, function, function_args, message):
-
         """
         Constructor method. Draws a button on a surface.
 
@@ -47,7 +45,6 @@ class Button:
         self.draw()
 
     def on_click(self):
-
         """
         Method to be executed when the button is pressed. self.function is called with the arguments passed to the
         button when instantiated. The * passes all the items in button_args as arguments.
@@ -67,7 +64,6 @@ class Button:
                     self.function[i]()
 
     def check_click(self, mouse_position):
-
         """
         Checks if the mouse cursor is within the button. This should be called whenever the mouse is clicked.
 
@@ -79,7 +75,6 @@ class Button:
             self.on_click()
 
     def draw(self):
-
         """Draws the button onto another surface"""
 
         self.button.fill(self.colour)
