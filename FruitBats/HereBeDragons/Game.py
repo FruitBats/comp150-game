@@ -39,8 +39,6 @@ class Game:
     SCREEN_WIDTH = 800  # defines screen width
     SCREEN_HEIGHT = 600  # defines screen height
 
-    new_game = True    # If the player needs to create a character or not. For testing only currently.
-
     def __init__(self):
         self.run()
 
@@ -56,15 +54,15 @@ class Game:
         menu = GameMenu(self.screen)
         menu.run()
 
-        if self.new_game:
-            # Character creation goes here
+        # Init character creation screen if new game is started
+        if menu.new_game:
             character_creation.load_creation_window(self.screen)
 
         # Init map
         self.map = MapClass(seed=10)
 
         # Init fog
-        self.fog = Fog()
+        self.fog = Fog(self.t0, 10, 5)
 
         # Init character
         self.player = Player(0, 0, self.map)
@@ -106,14 +104,8 @@ class Game:
 
             self.delta_time = self.tick_time - last_time
 
-            # Change day to true or false every #seconds, calls fog function to update surface
-            seconds = 10
-            t1 = time.time()
-            dt = t1 - self.t0  # gets difference in start time and current time
-            if dt >= seconds:
-                self.fog.day = not self.fog.day
-                self.t0 = t1  # resets timer variable
-                self.fog.lift_fog()
+            # Update fog
+            self.fog.update()
 
             # Cap delta time to 10FPS to prevent gamebreaking bugs
             if self.delta_time >= 0.1:
@@ -143,7 +135,7 @@ class Game:
 
 
             # Render fog
-            #self.fog.render_fog(self)
+            self.fog.render(self)
 
             # Draw health bar
             self.health.update()
