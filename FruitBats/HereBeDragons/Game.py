@@ -23,6 +23,7 @@ from Helpers import Vector
 from SpriteGeneration import character_creation
 from SpriteGeneration import Sprite
 
+from Objects import *
 
 class Game:
     delta_time = 0  # time passed since last frame
@@ -102,7 +103,6 @@ class Game:
                 obj.render(self.screen, self.camera)
             self.player.render(self.screen, self.camera)
 
-
             # Render fog
             if self.fog_enabled:
                 self.fog.render(self)
@@ -113,21 +113,19 @@ class Game:
             for health1 in range(self.health.current_health):
                 self.screen.blit(self.health.health, (health1 + 7, 7))
             print self.health.current_health
+
             # Test fire arrow
             fire_time -= self.delta_time
             if fire_time <= 0:
                 fire_time = 1
-                distance = 3
-                ang = float(random.randrange(0, 360, 1))
+                distance = 4
+                ang = random.randrange(0, 360, 1)
                 spawn_pos = (self.player.x + math.sin(math.radians(ang)) * distance, self.player.y + math.cos(math.radians(ang)) * distance)
-                velocity = Vector(0, 0)
-                velocity.point_at_angle(ang - 180, 5)
-                self.objects.append(Arrow(spawn_pos, tuple(velocity), ang, self.map))
+                self.objects.append(Arrow(spawn_pos, (self.player.x, self.player.y), random.randrange(4, 6, 1), self.map))
+
             # Update inventory and render
             self.invent.update(events)
-            self.invent.render_invent(self.screen, self.SCREEN_WIDTH, self.SCREEN_HEIGHT)            
-            
-            # print("Player location: " + str(self.player.x) + ", " + str(self.player.y))
+            self.invent.render_invent(self.screen, self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
 
             # Splat to screen
             pygame.display.flip()
@@ -157,7 +155,7 @@ class Game:
         self.fog = Fog(self.t0, 10, 5)
 
         # Init character
-        self.player = Player(0, 0, self.map)
+        self.player = Player(1, 1, self.map)
         if Sprite.deserialize("player_sprite") is not None:
             self.player.sprite = Sprite.deserialize("player_sprite").image
 

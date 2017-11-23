@@ -1,7 +1,7 @@
 import math
 
 from Map import MAP
-
+from Helpers import *
 
 class CollisionBox:
     x = 0  # X offset of collision box in tiles (relative to sprite) (todo sprite origin compatibility)
@@ -72,3 +72,26 @@ class CollisionBox:
                 border_y2 = rot_y
 
         return (border_x1 + x_offset, border_y1 + y_offset, border_x2 + x_offset, border_y2 + y_offset)
+
+    def line_intersection(self, line_start, line_end, rotation=0, (x_origin, y_origin)=(0, 0), (x_offset, y_offset)=(0, 0)):
+        """Tests if a line collides with this collision box
+            Arguments:
+                line_start: (Vector) Starting point of the line
+                line_end: (Vector) Ending point of the line
+                rotation: (float) Rotation of the collision box in degrees
+                (x_origin, y_origin): (float) Origin of rotation, in pixels (usually mapped to sprite)
+                (x_offset, y_offset): (float) Position of this collision box, in tiles
+            Returns:
+                (Boolean) Whether or not the line intersects the collision box"""
+        down = Vector(math.sin(math.radians(rotation)), math.cos(math.radians(rotation))) * self.height
+        right = Vector(math.cos(math.radians(rotation)), -math.sin(math.radians(rotation))) * self.width
+
+        corners = [Vector(x_offset + self.x, y_offset + self.y) - down * ((y_origin / MAP.TILE_SIZE) / self.height) - right * ((x_origin / MAP.TILE_SIZE) / self.width)]
+        corners.append(corners[0] + right)
+        corners.append(corners[1] + down)
+        corners.append(corners[0] + down)
+
+        for i in xrange(0, 4):
+            if Vector.intersection(line_start, line_end, corners[i], corners[(i + 1) % 4]):
+                return True
+        return False
