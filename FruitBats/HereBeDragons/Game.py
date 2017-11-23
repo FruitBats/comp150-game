@@ -51,7 +51,7 @@ class Game:
         pygame.init()
         self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
 
-        pygame.display.set_caption('You can write a funny joke here, LUL!')
+        pygame.display.set_caption('Here Be Dragons')
 
         menu = GameMenu(self.screen)
         menu.run()

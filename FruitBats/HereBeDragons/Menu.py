@@ -2,7 +2,8 @@ import sys
 import pygame
 
 WHITE = (255, 255, 255)
-GREEN = (0, 255, 0)
+GREEN = (138, 43, 226)  # Not really a green now
+BLACK = (0, 0, 0)
 
 
 class MenuItem(pygame.font.Font):
@@ -15,7 +16,6 @@ class MenuItem(pygame.font.Font):
         self.label = self.render(self.text, 1, self.font_color)
         self.width = self.label.get_rect().width
         self.height = self.label.get_rect().height
-        self.dimensions = (self.width, self.height)
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.position = pos_x, pos_y
@@ -40,6 +40,7 @@ class GameMenu:
 
     running = True
     background_image = None
+    fullscreen = False
 
     def __init__(self, screen, font=None,
                  font_size=30, font_color=WHITE):
@@ -47,17 +48,19 @@ class GameMenu:
         self.scr_width = self.screen.get_rect().width
         self.scr_height = self.screen.get_rect().height
 
-        self.background_image = pygame.image.load("ImageFiles/Background.png")
+        self.background_image = pygame.image.load("ImageFiles/Background1.jpg")
         self.background_image = self.background_image.convert(32)
         self.background_image = pygame.transform.scale(self.background_image,
                                                        (self.scr_width, self.scr_height))
 
         self.clock = pygame.time.Clock()
+        self.menu_items = ('New Game', 'Settings', 'Quit')
         self.funcs = {"New Game": GameMenu.start_pressed,
+                      "Settings": GameMenu.settings,
                       "Quit": GameMenu.quit_pressed}
         self.items = []
         key_list = self.funcs.keys()
-        for index, item in enumerate(key_list):
+        for index, item in enumerate(self.menu_items):
             menu_item = MenuItem(item, font, font_size, font_color)
 
             # total height of text block
@@ -73,6 +76,14 @@ class GameMenu:
 
     def start_pressed(self):
         self.running = False
+
+    def settings(self):
+        if self.fullscreen is False:
+            self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+            self.fullscreen = True
+        elif self.fullscreen is not False:
+            self.screen = pygame.display.set_mode((self.scr_width, self.scr_height))
+            self.fullscreen = False
 
     def quit_pressed(self):
         sys.exit()
@@ -126,7 +137,7 @@ class GameMenu:
             item.set_font_color(GREEN)
             item.set_italic(True)
         else:
-            item.set_font_color(WHITE)
+            item.set_font_color(BLACK)
             item.set_italic(False)
 
     def run(self):
@@ -135,7 +146,7 @@ class GameMenu:
             # Limit frame speed to 50 FPS
             self.clock.tick(50)
 
-            mpos = pygame.mouse.get_pos()
+            mouse_position = pygame.mouse.get_pos()
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -145,7 +156,7 @@ class GameMenu:
                     self.set_item_selection(event.key)
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     for item in self.items:
-                        if item.is_mouse_selection(mpos):
+                        if item.is_mouse_selection(mouse_position):
                             self.funcs[item.text](self)
 
             if pygame.mouse.get_rel() != (0, 0):
@@ -159,7 +170,7 @@ class GameMenu:
 
             for item in self.items:
                 if self.mouse_is_visible:
-                    self.set_mouse_selection(item, mpos)
+                    self.set_mouse_selection(item, mouse_position)
                 self.screen.blit(item.label, item.position)
 
             pygame.display.flip()
