@@ -86,8 +86,7 @@ class Game:
 
         # Add test Pikachi (Pikachodes?) (plural?)
         for i in xrange(10):
-            self.objects.append(PikachuStatue(random.randint(0, 10),
-                                              random.randint(0, 10)))        # Add test sword
+            self.objects.append(PikachuStatue(random.randint(0, 10), random.randint(0, 10)))        # Add test sword
         self.objects.append(Swipe(3, 3))
 
         # self.objects.append(ChaserEnemy(3, 3))  # Testing with new enemy type
@@ -122,9 +121,7 @@ class Game:
             # Perform PyGame event loop
             events = pygame.event.get()  # makes event.get a variable so it can be passed to other functions
             for event in events:
-                if event.type == pygame.QUIT or \
-                        (event.type == pygame.KEYDOWN and
-                         event.key == pygame.K_ESCAPE):
+                if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                     self.quitting = True
 
             # Update objects (including player)
@@ -141,7 +138,6 @@ class Game:
                 obj.render(self.screen, self.camera)
             self.player.render(self.screen, self.camera)
 
-
             # Render fog
             #self.fog.render_fog(self)
 
@@ -151,21 +147,19 @@ class Game:
             for health1 in range(self.health.current_health):
                 self.screen.blit(self.health.health, (health1 + 7, 7))
             print self.health.current_health
+
             # Test fire arrow
             fire_time -= self.delta_time
             if fire_time <= 0:
                 fire_time = 1
-                distance = 3
-                ang = float(random.randrange(0, 360, 1))
+                distance = 4
+                ang = random.randrange(0, 360, 1)
                 spawn_pos = (self.player.x + math.sin(math.radians(ang)) * distance, self.player.y + math.cos(math.radians(ang)) * distance)
-                velocity = Vector(0, 0)
-                velocity.point_at_angle(ang - 180, 5)
-                self.objects.append(Arrow(spawn_pos, tuple(velocity), ang, self.map))
+                self.objects.append(Arrow(spawn_pos, (self.player.x, self.player.y), random.randrange(4, 6, 1), self.map))
+
             # Update inventory and render
             self.invent.update(events)
-            self.invent.render_invent(self.screen, self.SCREEN_WIDTH, self.SCREEN_HEIGHT)            
-            
-            # print("Player location: " + str(self.player.x) + ", " + str(self.player.y))
+            self.invent.render_invent(self.screen, self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
 
             # Splat to screen
             pygame.display.flip()

@@ -15,9 +15,8 @@ from DynaSword import DynaSword
 class Player(Character):
     max_speed = 7.0  # The maximum running speed, in tiles/sec
     acceleration = 35.0  # Rate of acceleration while running, in tiles/sec/sec
-    friction = 90.0  # Rate of slowdown when releasing movement keys
-    x_velocity = 0.0  # Rate of movement per axis in tiles/sec
-    y_velocity = 0.0
+    friction = 70.0  # Rate of slowdown when releasing movement keys
+    velocity = None  # (Vector) Rate of movement per axis in tiles/sec
     dynasword = None  # Pointer to dynasword
 
     def __init__(self, x, y, parent_map):
@@ -37,6 +36,7 @@ class Player(Character):
 
         # self.collision = CollisionParams((10, 1), (39, 72), True)
         self.collision = CollisionBox((0 + 10, 0 + 10), (self.size[0] - 20, self.size[1] - 20), True)
+        self.velocity = Vector(0, 0)
 
     def update(self, delta_time, player, object_list, map):
         # Perform updates
@@ -46,66 +46,50 @@ class Player(Character):
     def update_movement(self, delta_time, player, object_list, map):
         # Perform character movement
         key_pressed = pygame.key.get_pressed()
+
         # Make a normalised vector of movement based on user input
-        move_x = 0.0
-        move_y = 0.0
+        move = Vector(0.0, 0.0)
         if key_pressed[pygame.K_w]:
-            move_y -= 1.0
+            move.y -= 1.0
         if key_pressed[pygame.K_s]:
-            move_y += 1.0
+            move.y += 1.0
         if key_pressed[pygame.K_d]:
-            move_x += 1.0
+            move.x += 1.0
         if key_pressed[pygame.K_a]:
-            move_x -= 1.0
+            move.x -= 1.0
 
-        vec_length = distance((0, 0), (move_x, move_y))
-        # If the movement vector is nonzero, move; otherwise do friction
-        # todo: determine why 'if vec_length is not 0.0' didn't work correctly
-        if vec_length > 0.000:
-            # Normalise
-            move_x /= vec_length
-            move_y /= vec_length
+        # If the movement vector is nonzero, stretch it by the player's acceleration factor to move; otherwise, change it to an opposite vector for friction
+        move_length = move.length()
+        current_speed = self.velocity.length()
 
-            # Accelerate according to the direction of the vector
-            self.x_velocity += move_x * self.acceleration * delta_time
-            self.y_velocity += move_y * self.acceleration * delta_time
+        # Do player acceleration
+        if move_length > 0.000:
+            # Scale movement vector to acceleration speed
+            move.normalise(self.acceleration + self.friction)  # + deceleration to fight the friction that immediately follows
 
-            # Cap player max speed
-            current_speed = distance((0, 0), (self.x_velocity, self.y_velocity))
-            if current_speed > self.max_speed:
-                self.x_velocity *= self.max_speed / current_speed
-                self.y_velocity *= self.max_speed / current_speed
-        else:
-            # Normalise to friction speed at max
-            current_speed = distance((0, 0),
-                                     (self.x_velocity, self.y_velocity))
-            decel_speed = self.friction  # speed of deceleration
+        # Do player deceleration
+        deceleration_speed = self.friction
 
-            # If the player is moving slower than the friction rate,
-            # cut the deceleration rate down to simply cancel out movement
-            if current_speed < decel_speed * delta_time:
-                decel_speed = current_speed / delta_time
+        # Cap the deceleration speed to <= current_speed (to avoid boosting in the opposite direction!)
+        if current_speed < deceleration_speed * delta_time:
+            deceleration_speed = current_speed / delta_time
 
-            if current_speed > 0:
-                move_x = -self.x_velocity * decel_speed / current_speed
-                move_y = -self.y_velocity * decel_speed / current_speed
+        if current_speed > 0:
+            move -= self.velocity * (deceleration_speed / self.velocity.length())
 
-            # Decelerate accordingly
-            self.x_velocity += move_x * delta_time
-            self.y_velocity += move_y * delta_time
+        # Accelerate or decelerate accordingly
+        self.velocity += move * delta_time
+
+        # Cap player speed
+        if self.velocity.length() > self.max_speed:
+            self.velocity.normalise(self.max_speed)
 
         # Move player by velocity
-        moved = self.move((self.x_velocity * delta_time,
-                           self.y_velocity * delta_time),
-                          object_list)
-
-        if self.sprite_angle >= 360:
-            self.sprite_angle -= 360
+        moved = self.move(tuple(self.velocity * delta_time), object_list)
 
         # Stop velocity if player collided with something
         if not moved:
-            self.x_velocity = 0
-            self.y_velocity = 0
+            self.velocity = Vector(0, 0)
 
     def update_attacks(self, delta_time, player, object_list, map):
         # Create sword

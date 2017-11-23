@@ -16,10 +16,11 @@ class Vector():
         length = math.sqrt(self.x * self.x + self.y * self.y)
 
         if length > 0:
-            self.x /= length
-            self.y /= length
+            self.x = self.x * value / length
+            self.y = self.y * value / length
         else:
-            self.x = 1  # how to error handling
+            self.x = 1  # how to error handling??
+            self.y = 0
 
     def length(self):
         """Returns the length of the vector as a float"""
@@ -36,6 +37,12 @@ class Vector():
 
     @staticmethod
     def to_angle(angle, length):
+        """Returns a new vector pointing toward an angle
+            Arguments:
+                angle (float): Angle of the new vector, in degrees
+                length (float): Length of the new vector
+            Returns:
+                (Vector) A vector pointing toward an angle with magnitude 'length'"""
         return Vector(-math.sin(math.radians(angle)) * length, -math.cos(math.radians(angle)) * length)
 
     @staticmethod
@@ -90,10 +97,10 @@ class Vector():
 # Global functions for simple math tasks
 # Functions accepting tuples can also accept vectors
 def distance((x1, y1), (x2, y2)):
-    """Returns the distance between two points"""
+    """Returns: (float) the distance between two points"""
     return math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))
 
 
 def direction((x1, y1), (x2, y2)):
-    """Returns the direction between two points, in radians"""
+    """Returns: (float) the direction between two points, in radians"""
     return math.radians(270) - math.atan2(y2 - y1, x2 - x1)

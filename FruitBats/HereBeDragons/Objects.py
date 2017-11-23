@@ -32,29 +32,26 @@ class Object:
 
     def render(self, screen, camera):
         """Renders the object (function overloadable by subclasses)"""
+        camera_vector = Vector(camera.x, camera.y)
         if self.sprite is not None:
             if self.sprite_angle is not 0:
                 # Clamp sprite_angle to 0 <= x < 360 with math magic
                 self.sprite_angle -= int(self.sprite_angle / 360) * 360
                 if self.sprite_angle < 0:
-                    self.sprite_angle -= int((self.sprite_angle / 360) - 1) \
-                                            * 360
+                    self.sprite_angle -= int((self.sprite_angle / 360) - 1) * 360
                 # Draw rotated sprite
                 rotated_sprite = pygame.transform.rotate(self.sprite,
                                                          self.sprite_angle)
 
                 # Behold my somehow-rotate-around-an-origin code!
                 # Declare X and Y position to draw at
-                place_x = self.x * MAP.TILE_SIZE
-                place_y = self.y * MAP.TILE_SIZE
+                place = Vector(self.x * MAP.TILE_SIZE, self.y * MAP.TILE_SIZE)
 
                 # Move back to centre of rotated image, which is always static
-                place_x -= rotated_sprite.get_width() / 2
-                place_y -= rotated_sprite.get_height() / 2
+                place -= Vector(rotated_sprite.get_width() / 2, rotated_sprite.get_height() / 2)
 
                 # Find the centre of the original image
-                centre_x = self.sprite.get_width() / 2
-                centre_y = self.sprite.get_height() / 2
+                centre = Vector(self.sprite.get_width() / 2, self.sprite.get_height() / 2)
 
                 if isinstance(self.sprite_origin, Vector):
                     # Perform a shift by the inverted origin, rotated
@@ -62,16 +59,14 @@ class Object:
                     cosine = math.cos(math.radians(self.sprite_angle))
 
                     # Shift along the X pixels by origin X
-                    place_x -= cosine * (self.sprite_origin.x - centre_x)
-                    place_y += sine * (self.sprite_origin.x - centre_x)
+                    place.x -= cosine * (self.sprite_origin.x - centre.x)
+                    place.y += sine * (self.sprite_origin.x - centre.x)
                     # Shift along the Y pixels by origin Y
-                    place_x -= sine * (self.sprite_origin.y - centre_y)
-                    place_y -= cosine * (self.sprite_origin.y - centre_y)
+                    place.x -= sine * (self.sprite_origin.y - centre.y)
+                    place.y -= cosine * (self.sprite_origin.y - centre.y)
 
                 # Blit!
-                screen.blit(rotated_sprite,
-                            (place_x - camera.x * MAP.TILE_SIZE,
-                             place_y - camera.y * MAP.TILE_SIZE))
+                screen.blit(rotated_sprite, tuple(place - camera_vector * MAP.TILE_SIZE))
             else:
                 if isinstance(self.sprite_origin, Vector):
                     # Draw sprite at origin
@@ -85,8 +80,6 @@ class Object:
         if self.debug_render_hitbox and self.collision:
             # Draw a collision box around the sprite
             # Prepare (potentially rotated) collision box vectors
-            camera_vector = Vector(camera.x, camera.y)
-
             coll_origin = (Vector(self.x, self.y) - camera_vector) * MAP.TILE_SIZE + Vector(self.collision.x, self.collision.y)
 
             if self.sprite_origin:
@@ -147,7 +140,7 @@ class Object:
            portraying how much they moved
         """
 
-        # Decide where the object is (trying) to go
+        # Test one step ahead. If the area is clear, self.x and self.y are set to the desired movement location
         desired_x = self.x + move_x
         desired_y = self.y + move_y
         collided = False
@@ -177,31 +170,31 @@ class Object:
                     desired_y = self.y
                     collided = True
 
-        # Map Collision detection
-        # Create player's collision box
-        box_left = desired_x + self.collision.x
-        box_top = desired_y + self.collision.y
-        box_right = box_left + self.collision.width
-        box_bottom = box_top + self.collision.height
+            # Map Collision detection
+            # Create player's collision box
+            box_left = desired_x + self.collision.x
+            box_top = desired_y + self.collision.y
+            box_right = box_left + self.collision.width
+            box_bottom = box_top + self.collision.height
 
-        # Check walkable for all tiles surrounding player.
-        for x in xrange(int(math.floor(box_left)), int(math.ceil(box_right) + 1)):
-            for y in xrange(int(math.floor(box_top)), int(math.ceil(box_bottom)+ 1)):
-                if MapClass.is_walkable(self.parent_map, x, y):
-                    pass
+            # Check walkable for all tiles surrounding player.
+            for x in xrange(int(math.floor(box_left)), int(math.ceil(box_right) + 1)):
+                for y in xrange(int(math.floor(box_top)), int(math.ceil(box_bottom)+ 1)):
+                    if MapClass.is_walkable(self.parent_map, x, y):
+                        pass
 
-                else:
-                    # Create tile's collision box
-                    tile_box_left = x
-                    tile_box_top = y
-                    tile_box_right = x + 1
-                    tile_box_bottom = y + 1
+                    else:
+                        # Create tile's collision box
+                        tile_box_left = x
+                        tile_box_top = y
+                        tile_box_right = x + 1
+                        tile_box_bottom = y + 1
 
-                    # Check collision
-                    if not (box_left >= tile_box_right or box_right <= tile_box_left or box_top >= tile_box_bottom or box_bottom <= tile_box_top):
-                        desired_x = self.x
-                        desired_y = self.y
-                        self.collided = True
+                        # Check collision
+                        if not (box_left >= tile_box_right or box_right <= tile_box_left or box_top >= tile_box_bottom or box_bottom <= tile_box_top):
+                            desired_x = self.x
+                            desired_y = self.y
+                            collided = True
 
         self.x = desired_x
         self.y = desired_y
