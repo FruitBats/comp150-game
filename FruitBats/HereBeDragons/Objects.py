@@ -7,18 +7,19 @@ from Collision import CollisionBox
 from Helpers import Vector
 
 
-class Object:
+class Object(object):
     # Main variables for characters
     x = 0  # in game tile units (1.0 = 1 tile)
     y = 0  # in game tile units
-    sprite = None  # current object sprite (todo: animations etc)
-    collision = None  # collision data (None=no collision/ghost)
-    sprite_angle = 0  # angle of rotation for this sprite in degrees
-    sprite_origin = None  # origin of sprite
-    debug_render_hitbox = False  # whether to render the hitbox (for debugging)
+    sprite = None  # (pygame.Surface) current object sprite (todo: animations etc)
+    collision = None  # (CollisionBox) collision data (None=no collision/ghost)
+    _sprite_angle = 0  # (float) angle of rotation for this sprite in degrees (use the property sprite_angle)
+    sprite_origin = None  # (Vector) origin of sprite
+    debug_render_hitbox = False  # (Boolean) whether to render the hitbox (for debugging)
 
     parent_map = None # The map the object is created on
     debug_dyna = None
+
     def __init__(self, x, y, parent_map):
         """Initialise object at the given position"""
         self.x = x
@@ -32,29 +33,21 @@ class Object:
 
     def render(self, screen, camera):
         """Renders the object (function overloadable by subclasses)"""
+        camera_vector = Vector(camera.x, camera.y)
         if self.sprite is not None:
             if self.sprite_angle is not 0:
-                # Clamp sprite_angle to 0 <= x < 360 with math magic
-                self.sprite_angle -= int(self.sprite_angle / 360) * 360
-                if self.sprite_angle < 0:
-                    self.sprite_angle -= int((self.sprite_angle / 360) - 1) \
-                                            * 360
                 # Draw rotated sprite
-                rotated_sprite = pygame.transform.rotate(self.sprite,
-                                                         self.sprite_angle)
+                rotated_sprite = pygame.transform.rotate(self.sprite, self.sprite_angle)
 
                 # Behold my somehow-rotate-around-an-origin code!
                 # Declare X and Y position to draw at
-                place_x = self.x * MAP.TILE_SIZE
-                place_y = self.y * MAP.TILE_SIZE
+                place = Vector(self.x * MAP.TILE_SIZE, self.y * MAP.TILE_SIZE)
 
                 # Move back to centre of rotated image, which is always static
-                place_x -= rotated_sprite.get_width() / 2
-                place_y -= rotated_sprite.get_height() / 2
+                place -= Vector(float(rotated_sprite.get_width()) / 2, float(rotated_sprite.get_height()) / 2)
 
                 # Find the centre of the original image
-                centre_x = self.sprite.get_width() / 2
-                centre_y = self.sprite.get_height() / 2
+                centre = Vector(self.sprite.get_width() / 2, self.sprite.get_height() / 2)
 
                 if isinstance(self.sprite_origin, Vector):
                     # Perform a shift by the inverted origin, rotated
@@ -62,31 +55,36 @@ class Object:
                     cosine = math.cos(math.radians(self.sprite_angle))
 
                     # Shift along the X pixels by origin X
-                    place_x -= cosine * (self.sprite_origin.x - centre_x)
-                    place_y += sine * (self.sprite_origin.x - centre_x)
+                    place.x -= cosine * (self.sprite_origin.x - centre.x)
+                    place.y += sine * (self.sprite_origin.x - centre.x)
                     # Shift along the Y pixels by origin Y
-                    place_x -= sine * (self.sprite_origin.y - centre_y)
-                    place_y -= cosine * (self.sprite_origin.y - centre_y)
+                    place.x -= sine * (self.sprite_origin.y - centre.y)
+                    place.y -= cosine * (self.sprite_origin.y - centre.y)
+                else:
+                    # Perform a shift by 0,0, rotated
+                    sine = math.sin(math.radians(self.sprite_angle))
+                    cosine = math.cos(math.radians(self.sprite_angle))
+
+                    # Shift along the X pixels by origin X
+                    place.x -= cosine * -centre.x
+                    place.y += sine * -centre.x
+                    # Shift along the Y pixels by origin Y
+                    place.x -= sine * -centre.y
+                    place.y -= cosine * -centre.y
 
                 # Blit!
-                screen.blit(rotated_sprite,
-                            (place_x - camera.x * MAP.TILE_SIZE,
-                             place_y - camera.y * MAP.TILE_SIZE))
+                screen.blit(rotated_sprite, tuple(place - camera_vector * MAP.TILE_SIZE))
             else:
                 if isinstance(self.sprite_origin, Vector):
                     # Draw sprite at origin
                     screen.blit(self.sprite, ((self.x - camera.x) * MAP.TILE_SIZE - self.sprite_origin.x, (self.y - camera.y) * MAP.TILE_SIZE - self.sprite_origin.y))
                 else:
                     # Draw regular sprite
-                    screen.blit(self.sprite,
-                                ((self.x - camera.x) * MAP.TILE_SIZE,
-                                 (self.y - camera.y) * MAP.TILE_SIZE))
+                    screen.blit(self.sprite, ((self.x - camera.x) * MAP.TILE_SIZE, (self.y - camera.y) * MAP.TILE_SIZE))
 
         if self.debug_render_hitbox and self.collision:
             # Draw a collision box around the sprite
             # Prepare (potentially rotated) collision box vectors
-            camera_vector = Vector(camera.x, camera.y)
-
             coll_origin = (Vector(self.x, self.y) - camera_vector) * MAP.TILE_SIZE + Vector(self.collision.x, self.collision.y)
 
             if self.sprite_origin:
@@ -109,9 +107,6 @@ class Object:
 
             # Render sides of box
             # Draw pivot point
-            vec = self.get_pos_at_pixel((self.sprite.get_width() / 2, 0)) - camera_vector
-            vec2 = self.get_pos_at_pixel((self.sprite.get_width() / 2, self.sprite.get_height())) - camera_vector
-            pygame.draw.line(screen, (0, 0, 255), tuple(vec * MAP.TILE_SIZE), tuple(vec2 * MAP.TILE_SIZE), 1)
             if self.sprite_origin:
                 centre_point = (Vector(self.x, self.y) - camera_vector) * MAP.TILE_SIZE
                 pygame.draw.circle(screen, (255, 0, 0), (int(centre_point.x), int(centre_point.y)), 3, 1)
@@ -147,7 +142,7 @@ class Object:
            portraying how much they moved
         """
 
-        # Decide where the object is (trying) to go
+        # Test one step ahead. If the area is clear, self.x and self.y are set to the desired movement location
         desired_x = self.x + move_x
         desired_y = self.y + move_y
         collided = False
@@ -156,9 +151,9 @@ class Object:
         if self.collision and self.collision.solid:
             # Determine current area of our collision box
             if self.sprite_origin:
-                self_box = self.collision.get_bounding_box(self.sprite_angle, tuple(self.sprite_origin), (self.x + move_x, self.y + move_y))
+                self_box = self.collision.get_bounding_box(self.sprite_angle, tuple(self.sprite_origin), (desired_x, desired_y))
             else:
-                self_box = self.collision.get_bounding_box(self.sprite_angle, (0, 0), (self.x + move_x, self.y + move_y))
+                self_box = self.collision.get_bounding_box(self.sprite_angle, (0, 0), (desired_x, desired_y))
 
             # Check with other objects
             for object in object_list:
@@ -177,31 +172,25 @@ class Object:
                     desired_y = self.y
                     collided = True
 
-        # Map Collision detection
-        # Create player's collision box
-        box_left = desired_x + self.collision.x
-        box_top = desired_y + self.collision.y
-        box_right = box_left + self.collision.width
-        box_bottom = box_top + self.collision.height
+            # Map Collision detection
+            # Check walkable for all tiles surrounding object.
+            for x in xrange(int(math.floor(self_box[0])), int(math.ceil(self_box[2]) + 1)):
+                for y in xrange(int(math.floor(self_box[1])), int(math.ceil(self_box[3])+ 1)):
+                    if MapClass.is_walkable(self.parent_map, x, y):
+                        pass
 
-        # Check walkable for all tiles surrounding player.
-        for x in xrange(int(math.floor(box_left)), int(math.ceil(box_right) + 1)):
-            for y in xrange(int(math.floor(box_top)), int(math.ceil(box_bottom)+ 1)):
-                if MapClass.is_walkable(self.parent_map, x, y):
-                    pass
+                    else:
+                        # Create tile's collision box
+                        tile_box_left = x
+                        tile_box_top = y
+                        tile_box_right = x + 1
+                        tile_box_bottom = y + 1
 
-                else:
-                    # Create tile's collision box
-                    tile_box_left = x
-                    tile_box_top = y
-                    tile_box_right = x + 1
-                    tile_box_bottom = y + 1
-
-                    # Check collision
-                    if not (box_left >= tile_box_right or box_right <= tile_box_left or box_top >= tile_box_bottom or box_bottom <= tile_box_top):
-                        desired_x = self.x
-                        desired_y = self.y
-                        self.collided = True
+                        # Check collision
+                        if not (self_box[0] >= tile_box_right or self_box[2] <= tile_box_left or self_box[1] >= tile_box_bottom or self_box[3] <= tile_box_top):
+                            desired_x = self.x
+                            desired_y = self.y
+                            collided = True
 
         self.x = desired_x
         self.y = desired_y
@@ -238,3 +227,19 @@ class Object:
     def get_right(self):
         """Returns local 'right' Vector according to sprite rotation. Default is 1,0"""
         return Vector(math.cos(math.radians(self.sprite_angle)), -math.sin(math.radians(self.sprite_angle)))
+
+    @property
+    def sprite_angle(self):
+        """sprite_angle getter"""
+        return self._sprite_angle
+
+    @sprite_angle.setter
+    def sprite_angle(self, angle):
+        """sprite_angle setter: sets the sprite angle with a cyclic clamp to 0 or 360"""
+        self._sprite_angle = angle
+
+        # Clamp sprite_angle to 0 <= x < 360 with math magic
+        if self._sprite_angle >= 360:
+            self._sprite_angle -= int(self._sprite_angle / 360) * 360
+        if self._sprite_angle < 0:
+            self._sprite_angle -= int((self._sprite_angle / 360) - 1) * 360

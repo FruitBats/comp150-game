@@ -3,6 +3,7 @@ import pygame
 from Objects import *
 from Helpers import *
 from Map import MAP
+from Characters import Character
 
 
 class DynaAttack:
@@ -10,6 +11,7 @@ class DynaAttack:
     SWIPING = 1
     BLOCKING = 2
     BOOMERANGING = 3
+    COOLDOWN = 4
 
 
 class DynaSword(Object):
@@ -20,6 +22,7 @@ class DynaSword(Object):
     current_attack_timer = 0  # time til current attack ends, in seconds
     current_attack_angle = 0  # central angle of attack in degrees
     current_attack_target = None  # Vector position of boomerang target
+    current_attack_cooldown = 0  # cooldown timer
     mouse_x = 0  # mouse position relative to world
     mouse_y = 0  # mouse position relative to world
     origin_x = 0  # position of the sword's origin (usually the player's hand)
@@ -27,11 +30,14 @@ class DynaSword(Object):
 
     swipe_time = 0.1  # time, in seconds, a swipe will take
     swipe_range = 75  # range of swipe attack in degrees
+    swipe_cooldown = 0.33  # cooldown time after a swipe
 
     boomerang_spin_speed = 1800  # speed of boomerang rotation in degrees/sec
     boomerang_time = 1  # time a boomerang will last in the air, in sec
+    boomerang_cooldown = 0.6  # cooldown time after a boomerang
 
-    block_time = 0.25  # time a block will last
+    block_time = 0.15  # time a block will last
+    block_cooldown = 0.4  # cooldown time after a block
 
     owner = None  # Object that is using the dynasword
 
@@ -65,20 +71,29 @@ class DynaSword(Object):
         """
 
         # Set position
-        hand_x = self.owner.x + float(14) / MAP.TILE_SIZE
-        hand_y = self.owner.y + float(47) / MAP.TILE_SIZE
-        self.origin_x = self.owner.x + float(self.owner.sprite.get_width()) / 2 / MAP.TILE_SIZE
-        self.origin_y = self.owner.y + float(self.owner.sprite.get_height()) / 2 / MAP.TILE_SIZE
+        hand = Vector(self.owner.x, self.owner.y)
+        if isinstance(self.owner, Character):
+            hand = self.owner.get_hand_position()
+        self.origin_x = self.owner.x
+        self.origin_y = self.owner.y
         self.x = self.origin_x - math.sin(math.radians(self.current_attack_angle)) * float(self.owner.sprite.get_width()) / MAP.TILE_SIZE * 0.6
         self.y = self.origin_y - math.cos(math.radians(self.current_attack_angle)) * float(self.owner.sprite.get_height()) / MAP.TILE_SIZE * 0.6
 
         # Do attack-specific positioning and angling
-        if self.attack_state == DynaAttack.NONE:
+        if self.attack_state == DynaAttack.NONE or self.attack_state == DynaAttack.COOLDOWN:
             # Default sword position
             self.sprite_angle = 0
             self.sprite_origin = self.handle_origin
-            self.x = hand_x
-            self.y = hand_y
+            self.x = hand.x
+            self.y = hand.y
+
+            if self.attack_state == DynaAttack.COOLDOWN:
+                # Decrement cooldown timer
+                self.current_attack_cooldown -= delta_time
+
+                if self.current_attack_cooldown < 0:
+                    self.current_attack_cooldown = 0
+                    self.attack_state = DynaAttack.NONE
         elif self.attack_state == DynaAttack.SWIPING:
             # Do a 45-degree progressive swipe along attack_timer
             self.sprite_angle = self.current_attack_angle - self.swipe_range + (self.swipe_range * 2 * self.current_attack_timer / self.swipe_time)
@@ -103,8 +118,20 @@ class DynaSword(Object):
         # Decrement attack timer and stop if attack is over
         self.current_attack_timer -= delta_time
         if self.current_attack_timer < 0:
+            if self.attack_state is not DynaAttack.NONE:
+                # Start cooldown timer
+                if self.attack_state == DynaAttack.SWIPING:
+                    self.current_attack_cooldown = self.swipe_cooldown
+                elif self.attack_state == DynaAttack.BLOCKING:
+                    self.current_attack_cooldown = self.block_cooldown
+                elif self.attack_state == DynaAttack.BOOMERANGING:
+                    self.current_attack_cooldown = self.boomerang_cooldown
+
+                # Reset state
+                self.attack_state = DynaAttack.COOLDOWN
+
+            # Cap timer to 0
             self.current_attack_timer = 0
-            self.attack_state = DynaAttack.NONE
 
         self.collision_tests(object_list)
 
