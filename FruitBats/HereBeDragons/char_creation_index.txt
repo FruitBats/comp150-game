@@ -1,3 +1,3 @@
 hair_index 42
-body_index 75
-legs_index 4
+body_index 77
+legs_index 3

@@ -42,6 +42,7 @@ class GameMenu:
     background_image = None
     new_game = False
     fullscreen = False
+    settings_window = False
 
     def __init__(self, screen, font=None,
                  font_size=30, font_color=WHITE):
@@ -55,7 +56,8 @@ class GameMenu:
                                                        (self.scr_width, self.scr_height))
 
         self.clock = pygame.time.Clock()
-        self.menu_items = ('New Game', 'Continue Game', 'Settings', 'Quit')
+        self.menu_items = ('New Game', 'Continue Game',
+                           'Settings', 'Quit')
         self.funcs = {"New Game": GameMenu.start_pressed,
                       "Continue Game": GameMenu.continue_pressed,
                       "Settings": GameMenu.settings,
@@ -68,7 +70,8 @@ class GameMenu:
             # total height of text block
             total_height = len(key_list) * menu_item.height
             pos_x = (self.scr_width / 2) - (menu_item.width / 2)
-            pos_y = (self.scr_height / 2) - (total_height / 2) + ((index * 2) + index * menu_item.height)
+            pos_y = (self.scr_height / 2) - (total_height / 2) +\
+                    ((index * 2) + index * menu_item.height)
 
             menu_item.set_position(pos_x, pos_y)
             self.items.append(menu_item)

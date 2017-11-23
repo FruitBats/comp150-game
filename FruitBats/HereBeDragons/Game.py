@@ -38,6 +38,7 @@ class Game:
     menu = None
     SCREEN_WIDTH = 800  # defines screen width
     SCREEN_HEIGHT = 600  # defines screen height
+    game_over = False
 
     def __init__(self):
         self.run()
@@ -64,7 +65,9 @@ class Game:
 
         # Main loop
         fire_time = 0
+
         while not self.quitting:
+
             # Update timing
             last_time = self.tick_time
             self.tick_time = time.clock()
@@ -85,6 +88,11 @@ class Game:
                         (event.type == pygame.KEYDOWN and
                          event.key == pygame.K_ESCAPE):
                     self.quitting = True
+
+            # Checks if the player's is dead to call game over screen
+            if self.health.current_health <= 0:
+                self.game_over = True
+                self.run_game_over()
 
             # Update objects (including player)
             for obj in self.objects:
@@ -110,6 +118,7 @@ class Game:
             for health1 in range(self.health.current_health):
                 self.screen.blit(self.health.health, (health1 + 7, 7))
             print self.health.current_health
+
             # Test fire arrow
             fire_time -= self.delta_time
             if fire_time <= 0:
@@ -128,6 +137,23 @@ class Game:
 
             # Splat to screen
             pygame.display.flip()
+
+    def run_game_over(self):
+        message = CurrentHealth(self.screen)
+        key_pressed = pygame.key.get_pressed()
+        while self.game_over is True:
+            self.screen.fill(white)
+            message.message_to_screen("Game Over", red, -20, size="large")
+            message.message_to_screen("Press any key to get into menu", black, 50)
+            pygame.display.update()
+            if key_pressed[pygame.KEYDOWN]:
+                self.game_over = False
+                self.run_game()
+        pygame.display.flip()
+
+    def run_game(self):
+        if self.game_over is False:
+            self.run()
 
     def initalise_components(self):
         """
@@ -162,7 +188,7 @@ class Game:
         self.invent = Inventory(self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
 
         # Init health
-        self.health = CurrentHealth()
+        self.health = CurrentHealth(self.screen)
 
         # Init objects and player
         self.objects = list()
@@ -180,6 +206,7 @@ class Game:
         # self.objects.append(ChaserEnemy(3, 3))  # Testing with new enemy type
         # self.objects.append(ChaserEnemy(3, 3, self.map))  # Testing with new enemy type
         # self.objects.append(Enemy(3, 3, 10, self.map))
+
 
 # Startup game!
 Game()
