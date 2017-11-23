@@ -3,6 +3,7 @@ import pygame
 from Objects import *
 from Helpers import *
 from Map import MAP
+from Characters import Character
 
 
 class DynaAttack:
@@ -70,10 +71,11 @@ class DynaSword(Object):
         """
 
         # Set position
-        hand_x = self.owner.x + float(14) / MAP.TILE_SIZE
-        hand_y = self.owner.y + float(47) / MAP.TILE_SIZE
-        self.origin_x = self.owner.x + float(self.owner.sprite.get_width()) / 2 / MAP.TILE_SIZE
-        self.origin_y = self.owner.y + float(self.owner.sprite.get_height()) / 2 / MAP.TILE_SIZE
+        hand = Vector(self.owner.x, self.owner.y)
+        if isinstance(self.owner, Character):
+            hand = self.owner.get_hand_position()
+        self.origin_x = self.owner.x
+        self.origin_y = self.owner.y
         self.x = self.origin_x - math.sin(math.radians(self.current_attack_angle)) * float(self.owner.sprite.get_width()) / MAP.TILE_SIZE * 0.6
         self.y = self.origin_y - math.cos(math.radians(self.current_attack_angle)) * float(self.owner.sprite.get_height()) / MAP.TILE_SIZE * 0.6
 
@@ -82,12 +84,13 @@ class DynaSword(Object):
             # Default sword position
             self.sprite_angle = 0
             self.sprite_origin = self.handle_origin
-            self.x = hand_x
-            self.y = hand_y
+            self.x = hand.x
+            self.y = hand.y
 
             if self.attack_state == DynaAttack.COOLDOWN:
                 # Decrement cooldown timer
                 self.current_attack_cooldown -= delta_time
+
                 if self.current_attack_cooldown < 0:
                     self.current_attack_cooldown = 0
                     self.attack_state = DynaAttack.NONE

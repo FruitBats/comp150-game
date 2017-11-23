@@ -68,7 +68,7 @@ class Game:
         self.fog = Fog()
 
         # Init character
-        self.player = Player(0, 0, self.map)
+        self.player = Player(1, 1, self.map)
         if Sprite.deserialize("player_sprite") is not None:
             self.player.sprite = Sprite.deserialize("player_sprite").image
 
@@ -91,7 +91,7 @@ class Game:
         self.objects.append(Swipe(3, 3))
 
         # self.objects.append(ChaserEnemy(3, 3))  # Testing with new enemy type
-        # self.objects.append(ChaserEnemy(3, 3, self.map))  # Testing with new enemy type
+        self.objects.append(ChaserEnemy(6, 3, self.map))  # Testing with new enemy type
         # self.objects.append(Enemy(3, 3, 10, self.map))
         # Init main game parameters
         self.start_time = time.clock()

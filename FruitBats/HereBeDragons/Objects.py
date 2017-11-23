@@ -11,11 +11,11 @@ class Object(object):
     # Main variables for characters
     x = 0  # in game tile units (1.0 = 1 tile)
     y = 0  # in game tile units
-    sprite = None  # current object sprite (todo: animations etc)
-    collision = None  # collision data (None=no collision/ghost)
-    _sprite_angle = 0  # angle of rotation for this sprite in degrees (use the property sprite_angle)
-    sprite_origin = None  # origin of sprite
-    debug_render_hitbox = False  # whether to render the hitbox (for debugging)
+    sprite = None  # (pygame.Surface) current object sprite (todo: animations etc)
+    collision = None  # (CollisionBox) collision data (None=no collision/ghost)
+    _sprite_angle = 0  # (float) angle of rotation for this sprite in degrees (use the property sprite_angle)
+    sprite_origin = None  # (Vector) origin of sprite
+    debug_render_hitbox = False  # (Boolean) whether to render the hitbox (for debugging)
 
     parent_map = None # The map the object is created on
     debug_dyna = None
@@ -151,9 +151,9 @@ class Object(object):
         if self.collision and self.collision.solid:
             # Determine current area of our collision box
             if self.sprite_origin:
-                self_box = self.collision.get_bounding_box(self.sprite_angle, tuple(self.sprite_origin), (self.x + move_x, self.y + move_y))
+                self_box = self.collision.get_bounding_box(self.sprite_angle, tuple(self.sprite_origin), (desired_x, desired_y))
             else:
-                self_box = self.collision.get_bounding_box(self.sprite_angle, (0, 0), (self.x + move_x, self.y + move_y))
+                self_box = self.collision.get_bounding_box(self.sprite_angle, (0, 0), (desired_x, desired_y))
 
             # Check with other objects
             for object in object_list:
@@ -173,15 +173,9 @@ class Object(object):
                     collided = True
 
             # Map Collision detection
-            # Create player's collision box
-            box_left = desired_x + self.collision.x
-            box_top = desired_y + self.collision.y
-            box_right = box_left + self.collision.width
-            box_bottom = box_top + self.collision.height
-
-            # Check walkable for all tiles surrounding player.
-            for x in xrange(int(math.floor(box_left)), int(math.ceil(box_right) + 1)):
-                for y in xrange(int(math.floor(box_top)), int(math.ceil(box_bottom)+ 1)):
+            # Check walkable for all tiles surrounding object.
+            for x in xrange(int(math.floor(self_box[0])), int(math.ceil(self_box[2]) + 1)):
+                for y in xrange(int(math.floor(self_box[1])), int(math.ceil(self_box[3])+ 1)):
                     if MapClass.is_walkable(self.parent_map, x, y):
                         pass
 
@@ -193,7 +187,7 @@ class Object(object):
                         tile_box_bottom = y + 1
 
                         # Check collision
-                        if not (box_left >= tile_box_right or box_right <= tile_box_left or box_top >= tile_box_bottom or box_bottom <= tile_box_top):
+                        if not (self_box[0] >= tile_box_right or self_box[2] <= tile_box_left or self_box[1] >= tile_box_bottom or self_box[3] <= tile_box_top):
                             desired_x = self.x
                             desired_y = self.y
                             collided = True

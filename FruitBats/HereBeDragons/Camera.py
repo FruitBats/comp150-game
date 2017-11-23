@@ -1,4 +1,5 @@
 from Map import MAP
+from Player import *
 
 
 class Camera:
@@ -12,10 +13,11 @@ class Camera:
         self.view_height = view_height
 
     def update(self, delta_time, player, object_list, map):
-        self.x = player.x - (float(self.view_width - player.sprite.get_width())
-                             / 2 / MAP.TILE_SIZE)
-        self.y = player.y - (float(self.view_height - player.sprite.get_height())
-                             / 2 / MAP.TILE_SIZE)
+        if player.state == PlayerState.ALIVE:
+            self.x = player.x - (float(self.view_width - player.sprite.get_width())
+                                 / 2 / MAP.TILE_SIZE)
+            self.y = player.y - (float(self.view_height - player.sprite.get_height())
+                                 / 2 / MAP.TILE_SIZE)
 
         if self.x < 0:
             self.x = 0
