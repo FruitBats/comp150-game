@@ -49,6 +49,7 @@ class Player(Character):
 
         # Make a normalised vector of movement based on user input
         move = Vector(0.0, 0.0)
+
         if key_pressed[pygame.K_w]:
             move.y -= 1.0
         if key_pressed[pygame.K_s]:

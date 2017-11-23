@@ -7,18 +7,19 @@ from Collision import CollisionBox
 from Helpers import Vector
 
 
-class Object:
+class Object(object):
     # Main variables for characters
     x = 0  # in game tile units (1.0 = 1 tile)
     y = 0  # in game tile units
     sprite = None  # current object sprite (todo: animations etc)
     collision = None  # collision data (None=no collision/ghost)
-    sprite_angle = 0  # angle of rotation for this sprite in degrees
+    _sprite_angle = 0  # angle of rotation for this sprite in degrees (use the property sprite_angle)
     sprite_origin = None  # origin of sprite
     debug_render_hitbox = False  # whether to render the hitbox (for debugging)
 
     parent_map = None # The map the object is created on
     debug_dyna = None
+
     def __init__(self, x, y, parent_map):
         """Initialise object at the given position"""
         self.x = x
@@ -35,20 +36,15 @@ class Object:
         camera_vector = Vector(camera.x, camera.y)
         if self.sprite is not None:
             if self.sprite_angle is not 0:
-                # Clamp sprite_angle to 0 <= x < 360 with math magic
-                self.sprite_angle -= int(self.sprite_angle / 360) * 360
-                if self.sprite_angle < 0:
-                    self.sprite_angle -= int((self.sprite_angle / 360) - 1) * 360
                 # Draw rotated sprite
-                rotated_sprite = pygame.transform.rotate(self.sprite,
-                                                         self.sprite_angle)
+                rotated_sprite = pygame.transform.rotate(self.sprite, self.sprite_angle)
 
                 # Behold my somehow-rotate-around-an-origin code!
                 # Declare X and Y position to draw at
                 place = Vector(self.x * MAP.TILE_SIZE, self.y * MAP.TILE_SIZE)
 
                 # Move back to centre of rotated image, which is always static
-                place -= Vector(rotated_sprite.get_width() / 2, rotated_sprite.get_height() / 2)
+                place -= Vector(float(rotated_sprite.get_width()) / 2, float(rotated_sprite.get_height()) / 2)
 
                 # Find the centre of the original image
                 centre = Vector(self.sprite.get_width() / 2, self.sprite.get_height() / 2)
@@ -64,6 +60,17 @@ class Object:
                     # Shift along the Y pixels by origin Y
                     place.x -= sine * (self.sprite_origin.y - centre.y)
                     place.y -= cosine * (self.sprite_origin.y - centre.y)
+                else:
+                    # Perform a shift by 0,0, rotated
+                    sine = math.sin(math.radians(self.sprite_angle))
+                    cosine = math.cos(math.radians(self.sprite_angle))
+
+                    # Shift along the X pixels by origin X
+                    place.x -= cosine * -centre.x
+                    place.y += sine * -centre.x
+                    # Shift along the Y pixels by origin Y
+                    place.x -= sine * -centre.y
+                    place.y -= cosine * -centre.y
 
                 # Blit!
                 screen.blit(rotated_sprite, tuple(place - camera_vector * MAP.TILE_SIZE))
@@ -73,9 +80,7 @@ class Object:
                     screen.blit(self.sprite, ((self.x - camera.x) * MAP.TILE_SIZE - self.sprite_origin.x, (self.y - camera.y) * MAP.TILE_SIZE - self.sprite_origin.y))
                 else:
                     # Draw regular sprite
-                    screen.blit(self.sprite,
-                                ((self.x - camera.x) * MAP.TILE_SIZE,
-                                 (self.y - camera.y) * MAP.TILE_SIZE))
+                    screen.blit(self.sprite, ((self.x - camera.x) * MAP.TILE_SIZE, (self.y - camera.y) * MAP.TILE_SIZE))
 
         if self.debug_render_hitbox and self.collision:
             # Draw a collision box around the sprite
@@ -102,9 +107,6 @@ class Object:
 
             # Render sides of box
             # Draw pivot point
-            vec = self.get_pos_at_pixel((self.sprite.get_width() / 2, 0)) - camera_vector
-            vec2 = self.get_pos_at_pixel((self.sprite.get_width() / 2, self.sprite.get_height())) - camera_vector
-            pygame.draw.line(screen, (0, 0, 255), tuple(vec * MAP.TILE_SIZE), tuple(vec2 * MAP.TILE_SIZE), 1)
             if self.sprite_origin:
                 centre_point = (Vector(self.x, self.y) - camera_vector) * MAP.TILE_SIZE
                 pygame.draw.circle(screen, (255, 0, 0), (int(centre_point.x), int(centre_point.y)), 3, 1)
@@ -231,3 +233,19 @@ class Object:
     def get_right(self):
         """Returns local 'right' Vector according to sprite rotation. Default is 1,0"""
         return Vector(math.cos(math.radians(self.sprite_angle)), -math.sin(math.radians(self.sprite_angle)))
+
+    @property
+    def sprite_angle(self):
+        """sprite_angle getter"""
+        return self._sprite_angle
+
+    @sprite_angle.setter
+    def sprite_angle(self, angle):
+        """sprite_angle setter: sets the sprite angle with a cyclic clamp to 0 or 360"""
+        self._sprite_angle = angle
+
+        # Clamp sprite_angle to 0 <= x < 360 with math magic
+        if self._sprite_angle >= 360:
+            self._sprite_angle -= int(self._sprite_angle / 360) * 360
+        if self._sprite_angle < 0:
+            self._sprite_angle -= int((self._sprite_angle / 360) - 1) * 360

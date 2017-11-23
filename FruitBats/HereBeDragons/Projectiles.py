@@ -42,10 +42,10 @@ class Arrow(Object):
         self.parent_map = parent_map
 
         if math.sin(math.radians(self.sprite_angle)) < 0:
-            self.sprite_angle += 20
+            #self.sprite_angle += 20
             self.tilt_angle = -20
         else:
-            self.sprite_angle -= 20
+            #self.sprite_angle -= 20
             self.tilt_angle = 20
 
     def update(self, delta_time, player, object_list, map):
@@ -56,7 +56,7 @@ class Arrow(Object):
 
         if not self.deflected and self.flight_time > 0:
             # While airborne, tilt up and down slightly
-            self.sprite_angle += math.radians(self.tilt_angle * math.sin((self.flight_time / self.start_flight_time) * math.pi))
+            #self.sprite_angle += math.radians(self.tilt_angle * math.sin((self.flight_time / self.start_flight_time) * math.pi))
             self.velocity.point_at_angle(self.sprite_angle, self.velocity.length())
 
             # Collide with DynaSwords and deflect
@@ -66,6 +66,9 @@ class Arrow(Object):
 
                 for obj in object_list:
                     if isinstance(obj, DynaSword):
+                        if obj.attack_state is not DynaSword.BLOCKING:
+                            continue
+
                         # Because the default hitbox would be too large, use line collision
                         # Try to collide the line through this arrow with the line through the DynaSword
                         sword_start = obj.get_pos_at_pixel((0, 0))
@@ -75,11 +78,11 @@ class Arrow(Object):
                             # Bounce off the sword with unknown math magic
                             sword_normal = Vector(sword_end.y - sword_start.y, -(sword_end.x - sword_start.x))
                             sword_normal.normalise()
-                            self.velocity += sword_normal * -abs(Vector.dot(self.velocity, sword_normal)) * 2
+                            self.velocity += sword_normal * -abs(Vector.dot(self.velocity, sword_normal)) * 2 + player.velocity
+
                             self.sprite_angle = math.degrees(direction((0, 0), tuple(self.velocity)))
                             self.deflected = True
                             self.flight_time = self.start_flight_time
-                            self.collision.solid = False
         elif self.deflected and self.flight_time > 0:
             # Spin like mad
             pass

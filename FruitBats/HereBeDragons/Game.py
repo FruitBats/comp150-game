@@ -23,6 +23,7 @@ from Helpers import Vector
 from SpriteGeneration import character_creation
 from SpriteGeneration import Sprite
 
+from Objects import *
 
 class Game:
     delta_time = 0  # time passed since last frame
