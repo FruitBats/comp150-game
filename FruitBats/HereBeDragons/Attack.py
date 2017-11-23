@@ -2,7 +2,7 @@ import pygame
 import math
 
 from Objects import Object
-from Collision import CollisionParams
+from Collision import CollisionBox
 from Map import MapClass, MAP
 
 
@@ -17,7 +17,7 @@ class Swipe(Object):
         self.sprite = self.original_sprite  # making a copy of an image
         self.x = x
         self.y = y
-        self.collision = CollisionParams((0, 0), (32, 32), False)
+        self.collision = CollisionBox((0, 0), (32, 32), False)
 
     def update(self, delta_time, player, object_list, map):
         # looking for mouse's x value

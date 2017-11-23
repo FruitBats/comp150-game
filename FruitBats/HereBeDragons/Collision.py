@@ -1,8 +1,9 @@
+import math
+
 from Map import MAP
 
 
-class CollisionParams:
-    shape = 0  # Todo: Add sphere collision etc?
+class CollisionBox:
     x = 0  # X offset of collision box in tiles (relative to sprite) (todo sprite origin compatibility)
     y = 0  # Y offset of collision box in tiles
     width = 0  # Width of collision box in tiles
@@ -23,3 +24,51 @@ class CollisionParams:
         self.width = float(width) / float(MAP.TILE_SIZE)
         self.height = float(height) / float(MAP.TILE_SIZE)
         self.solid = solid
+
+    def get_bounding_box(self, rotation=0, (x_origin, y_origin)=(0, 0), (x_offset, y_offset)=(0, 0)):
+        """Returns the absolute bounding box of this collision box when hypothetically rotated around an origin, returning a pygame.Rect
+
+        Arguments:
+            rotation (float): Angle of the box in degrees
+            (x_origin, y_origin) (int): Origin of the rotation in pixels.
+            (x_offset, y_offset) (float): Offset to add to the box in tiles
+        Returns (float): tuple containing left x, top y, right x and bottom y of the bounding box, in tiles
+        """
+        if rotation is None or float(rotation) is 0.0:
+            # Return a simple bounding box instead of processing a zero rotation
+            return (self.x - x_origin/float(MAP.TILE_SIZE) + x_offset, self.y - y_origin/float(MAP.TILE_SIZE) + y_offset,
+                    self.x + self.width - x_origin/float(MAP.TILE_SIZE) + x_offset, self.y + self.height - y_origin/float(MAP.TILE_SIZE) + y_offset)
+
+        # Define tile origin in tile units
+        tile_origin = (x_origin / float(MAP.TILE_SIZE), y_origin / float(MAP.TILE_SIZE))
+
+        # Define initial border, shifted according to sprite_origin
+        x1 = self.x - tile_origin[0]
+        y1 = self.y - tile_origin[1]
+        x2 = x1 + self.width
+        y2 = y1 + self.height
+
+        # Rotate the border points
+        rot_sin = math.sin(math.radians(rotation))
+        rot_cos = math.cos(math.radians(rotation))
+        corners = [x1, y1, x2, y1, x2, y2, x1, y2]  # points (could be tuples; raw coordinates are instead used for performance)
+
+        # Initialise borders using te first point as reference (main alternative is using magic numbers...)
+        border_x1 = corners[0] * rot_cos + corners[1] * rot_sin
+        border_y1 = corners[1] * rot_cos - corners[0] * rot_sin
+        border_x2 = border_x1
+        border_y2 = border_y1
+
+        for i in xrange(2, 8, 2):
+            rot_x = corners[i] * rot_cos + corners[i + 1] * rot_sin
+            rot_y = corners[i + 1] * rot_cos - corners[i] * rot_sin
+            if rot_x < border_x1:
+                border_x1 = rot_x
+            if rot_x > border_x2:
+                border_x2 = rot_x
+            if rot_y < border_y1:
+                border_y1 = rot_y
+            if rot_y > border_y2:
+                border_y2 = rot_y
+
+        return (border_x1 + x_offset, border_y1 + y_offset, border_x2 + x_offset, border_y2 + y_offset)

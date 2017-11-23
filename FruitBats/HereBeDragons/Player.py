@@ -7,7 +7,7 @@ import pygame
 # Project imports
 from Characters import Character
 from Map import *
-from Collision import CollisionParams
+from Collision import CollisionBox
 from Helpers import *
 from DynaSword import DynaSword
 
@@ -36,7 +36,7 @@ class Player(Character):
         # self.sprite_origin = (self.size[0] / 2), (self.size[1] / 2)    # Wasn't sure if origin should be set here or not.
 
         # self.collision = CollisionParams((10, 1), (39, 72), True)
-        self.collision = CollisionParams((0 + 10, 0 + 10), (self.size[0] - 20, self.size[1] - 20), True)
+        self.collision = CollisionBox((0 + 10, 0 + 10), (self.size[0] - 20, self.size[1] - 20), True)
 
     def update(self, delta_time, player, object_list, map):
         # Perform updates

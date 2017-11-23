@@ -1,5 +1,7 @@
+# Todo: Clean up unused imports
 import time
 import random
+import math
 
 import pygame
 
@@ -13,9 +15,11 @@ from Camera import Camera
 from Menu import *
 from Invent import *
 from Fog import Fog
+
 from Characters import Character
 from Health import *
-
+from Projectiles import Arrow
+from Helpers import Vector
 from SpriteGeneration import character_creation
 from SpriteGeneration import Sprite
 
@@ -82,20 +86,19 @@ class Game:
 
         # Add test Pikachi (Pikachodes?) (plural?)
         for i in xrange(10):
-            self.objects.append(PikachuStatue(random.randint(0, 10), random.randint(0, 10)))
-
-        # Add test sword
+            self.objects.append(PikachuStatue(random.randint(0, 10),
+                                              random.randint(0, 10)))        # Add test sword
         self.objects.append(Swipe(3, 3))
 
-        # Init test enemy
+        # self.objects.append(ChaserEnemy(3, 3))  # Testing with new enemy type
         # self.objects.append(ChaserEnemy(3, 3, self.map))  # Testing with new enemy type
-        self.objects.append(Enemy(3, 3, 10, self.map))
-
+        # self.objects.append(Enemy(3, 3, 10, self.map))
         # Init main game parameters
         self.start_time = time.clock()
         self.delta_time = 0.0
 
         # Main loop
+        fire_time = 0
         while not self.quitting:
             # Update timing
             last_time = self.tick_time
@@ -140,7 +143,7 @@ class Game:
 
 
             # Render fog
-            self.fog.render_fog(self)
+            #self.fog.render_fog(self)
 
             # Draw health bar
             self.health.update()
@@ -148,7 +151,16 @@ class Game:
             for health1 in range(self.health.current_health):
                 self.screen.blit(self.health.health, (health1 + 7, 7))
             print self.health.current_health
-
+            # Test fire arrow
+            fire_time -= self.delta_time
+            if fire_time <= 0:
+                fire_time = 1
+                distance = 3
+                ang = float(random.randrange(0, 360, 1))
+                spawn_pos = (self.player.x + math.sin(math.radians(ang)) * distance, self.player.y + math.cos(math.radians(ang)) * distance)
+                velocity = Vector(0, 0)
+                velocity.point_at_angle(ang - 180, 5)
+                self.objects.append(Arrow(spawn_pos, tuple(velocity), ang, self.map))
             # Update inventory and render
             self.invent.update(events)
             self.invent.render_invent(self.screen, self.SCREEN_WIDTH, self.SCREEN_HEIGHT)            

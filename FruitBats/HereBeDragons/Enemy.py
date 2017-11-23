@@ -2,7 +2,7 @@ import pygame
 
 from Characters import Character
 from Helpers import *
-from Collision import CollisionParams
+from Collision import CollisionBox
 from DynaSword import DynaSword
 
 # Old enemy class
@@ -15,7 +15,7 @@ class ChaserEnemy(Character):
     def __init__(self, x, y, parent_map):
         self.x = float(x)
         self.y = float(y)
-        self.collision = CollisionParams((10, 1), (39, 72), True)
+        self.collision = CollisionBox((10, 1), (39, 72), True)
         self.sprite = pygame.image.load("graphics/enemy.png")
         self.velocity = Vector(0, 0)
         self.parent_map = parent_map
@@ -73,7 +73,7 @@ class Enemy(Character):
         self.x = float(x)
         self.y = float(y)
         self.hitpoints = hitpoints
-        self.collision = CollisionParams((10, 1), (39, 72), True)
+        self.collision = CollisionBox((10, 1), (39, 72), True)
         self.sprite = pygame.image.load("graphics/enemy.png")
         self.velocity = Vector(0, 0)
         self.parent_map = parent_map
@@ -141,8 +141,9 @@ class Enemy(Character):
         # Chase the player if close
         if self.chasing:
             to_player = Vector(player.x - self.x, player.y - self.y)
+            to_player.normalise(delta_time * self.acceleration * (1 - self.player_distance / self.detection_range))
 
-            self.velocity += to_player.normalise(delta_time * self.acceleration * (1 - self.player_distance / self.detection_range))
+            self.velocity += to_player
 
         # Move according to velocity
         if not self.move(self.velocity * delta_time, object_list):
