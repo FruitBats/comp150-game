@@ -92,6 +92,10 @@ class Game:
             for obj in self.objects:
                 obj.update(self.delta_time, self.player, self.objects, map)
 
+                if obj.dead:
+                    # Remove object from existence
+                    self.objects.remove(obj)
+
             # Update camera
             self.camera.update(self.delta_time, self.player, self.objects, map)
 
@@ -144,7 +148,7 @@ class Game:
         self.fog = Fog(self.t0, 10, 5)
 
         # Init character
-        self.player = Player(1, 1, self.map)
+        self.player = Player(0.5, 0.5, self.map)
         if Sprite.deserialize("player_sprite") is not None:
             self.player.sprite = Sprite.deserialize("player_sprite").image
 
