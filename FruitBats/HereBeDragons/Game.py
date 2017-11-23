@@ -39,6 +39,8 @@ class Game:
     SCREEN_WIDTH = 800  # defines screen width
     SCREEN_HEIGHT = 600  # defines screen height
 
+    fog_enabled = True  # Enable or disbale fog for testing
+
     def __init__(self):
         self.run()
 
@@ -83,6 +85,8 @@ class Game:
             for event in events:
                 if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                     self.quitting = True
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_f:
+                    self.fog_enabled = not self.fog_enabled
 
             # Update objects (including player)
             for obj in self.objects:
@@ -99,7 +103,8 @@ class Game:
             self.player.render(self.screen, self.camera)
 
             # Render fog
-            self.fog.render(self)
+            if self.fog_enabled:
+                self.fog.render(self)
 
             # Draw health bar
             self.health.update()
