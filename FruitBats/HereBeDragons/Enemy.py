@@ -2,22 +2,23 @@ import pygame
 
 from Characters import Character
 from Helpers import *
-from Collision import CollisionParams
+from Collision import CollisionBox
 from DynaSword import DynaSword
 
-
+# Old enemy class
 class ChaserEnemy(Character):
     detection_range = 5  # range, in tiles, before engaging with player
     acceleration = 20  # rate of acceleration, in tiles/sec/sec
     velocity = None  # current speed, as a Vector
     chasing = False  # whether currently chasing the player or not
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, parent_map):
         self.x = float(x)
         self.y = float(y)
-        self.collision = CollisionParams((10, 1), (39, 72), True)
+        self.collision = CollisionBox((10, 1), (39, 72), True)
         self.sprite = pygame.image.load("graphics/enemy.png")
         self.velocity = Vector(0, 0)
+        self.parent_map = parent_map
 
     def update(self, delta_time, player, object_list, map):
         # Check if the player is in range
@@ -39,12 +40,14 @@ class ChaserEnemy(Character):
         if not self.move(self.velocity * delta_time, object_list):
             self.velocity = Vector(0, 0)
 
+
+# New enemy class under testing
 class Enemy(Character):
 
     """Testing new enemies - Mango"""
 
     detection_range = 5  # range, in tiles, before engaging with player
-    attack_range = 2 # range, in tiles, before using an attack
+    attack_range = 2  # range, in tiles, before using an attack
     acceleration = 20  # rate of acceleration, in tiles/sec/sec
     velocity = None  # current speed, as a Vector
     chasing = False  # whether currently chasing the player or not
@@ -56,7 +59,7 @@ class Enemy(Character):
     player_y = 0
     player_distance = 0
 
-    def __init__(self, x, y, hitpoints):
+    def __init__(self, x, y, hitpoints, parent_map):
 
         """
         Constructor
@@ -70,9 +73,10 @@ class Enemy(Character):
         self.x = float(x)
         self.y = float(y)
         self.hitpoints = hitpoints
-        self.collision = CollisionParams((10, 1), (39, 72), True)
+        self.collision = CollisionBox((10, 1), (39, 72), True)
         self.sprite = pygame.image.load("graphics/enemy.png")
         self.velocity = Vector(0, 0)
+        self.parent_map = parent_map
 
     def update(self, delta_time, player, object_list, map):
 
@@ -125,9 +129,6 @@ class Enemy(Character):
         self.dynasword2.mouse_y = self.player_y
         self.dynasword2.attack()
 
-    def die(self):
-        pass # Enemy should "die"
-
     def chase_player(self, delta_time, player, object_list, map):
         # Check if the player is in range
 
@@ -140,8 +141,9 @@ class Enemy(Character):
         # Chase the player if close
         if self.chasing:
             to_player = Vector(player.x - self.x, player.y - self.y)
+            to_player.normalise(delta_time * self.acceleration * (1 - self.player_distance / self.detection_range))
 
-            self.velocity += to_player.normalise(delta_time * self.acceleration * (1 - self.player_distance / self.detection_range))
+            self.velocity += to_player
 
         # Move according to velocity
         if not self.move(self.velocity * delta_time, object_list):

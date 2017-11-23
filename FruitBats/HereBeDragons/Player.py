@@ -6,8 +6,8 @@ import pygame
 
 # Project imports
 from Characters import Character
-from Map import MapClass
-from Collision import CollisionParams
+from Map import *
+from Collision import CollisionBox
 from Helpers import *
 from DynaSword import DynaSword
 
@@ -20,7 +20,7 @@ class Player(Character):
     y_velocity = 0.0
     dynasword = None  # Pointer to dynasword
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, parent_map):
         """Init: Loads default player sprite and scales it up"""
         # Load character image
         self.sprite = pygame.image.load('graphics/game_character.png')
@@ -30,12 +30,13 @@ class Player(Character):
         #                (MapClass.TILE_SIZE, MapClass.TILE_SIZE))
         self.x = x
         self.y = y
+        self.parent_map = parent_map
 
         self.size = self.sprite.get_size()
         # self.sprite_origin = (self.size[0] / 2), (self.size[1] / 2)    # Wasn't sure if origin should be set here or not.
 
         # self.collision = CollisionParams((10, 1), (39, 72), True)
-        self.collision = CollisionParams((0 + 10, 0 + 10), (self.size[0] - 20, self.size[1] - 20), True)
+        self.collision = CollisionBox((0 + 10, 0 + 10), (self.size[0] - 20, self.size[1] - 20), True)
 
     def update(self, delta_time, player, object_list, map):
         # Perform updates
@@ -45,7 +46,6 @@ class Player(Character):
     def update_movement(self, delta_time, player, object_list, map):
         # Perform character movement
         key_pressed = pygame.key.get_pressed()
-
         # Make a normalised vector of movement based on user input
         move_x = 0.0
         move_y = 0.0

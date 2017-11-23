@@ -73,12 +73,11 @@ class CharacterCreation:
     running = True
 
     def __init__(self, screen, hair_list, body_list, legs_list):
-
         """
         Constructor method.
 
         Args:
-            size (tuple): The size in pixels of the character creation window.
+            screen (pygame.Display): The display to draw the creation screen on. This will likely be the main game screen.
             hair_list (list of images): The images that can be chosen for the character's head.
             body_list (list of images): The images that can be chosen for the character's body.
             legs_list (list of images): The images that can be chosen for the character's legs.
@@ -97,24 +96,12 @@ class CharacterCreation:
 
         # Get the position in the component lists from the last session.
         self.read_component_index("char_creation_index.txt")
-
-        # Check if loading from serialized file. This should be temporary. For testing only.
-        if self.loading:
-            #if Sprite.deserialize("player_sprite") is not None:
-            self.player_char = Sprite.deserialize("player_sprite")
-
-        else:
-            self.player_char = self.load_blank_sprite()
+        self.player_char = self.load_blank_sprite()
 
     def draw_win(self):
-
         """Main method for the class. This creates the character creation window and checks for player input."""
 
         print("Drawing screen for first time")
-
-        # Initialise display
-        # self.main_screen = pygame.display.set_mode(self.size)
-        # self.main_screen.fill(self.background_colour)
 
         self.screen.fill(self.background_colour)
 
@@ -137,15 +124,14 @@ class CharacterCreation:
                     sys.exit()
 
     def update_screen(self):
-
         """Updates the character creation screen. Blits the character sprite to the screen and updates it."""
+
         self.screen.blit(self.player_char.image, self.char_position)
         pygame.display.flip()
 
         print("Screen updated")
 
     def load_blank_sprite(self):
-
         """
         Instantiates a new Sprite with a blank base and blank components as placeholders and draws the sprite image.
 
@@ -154,8 +140,9 @@ class CharacterCreation:
         """
 
         # Create and draw a new sprite with a base image and the last used components
-        blank_sprite = Sprite((128, 128), self.background_colour, pygame.transform.scale(self.blank_base, (128, 128)), self.legs_choices[self.legs_index],
-                                                                  self.body_choices[self.body_index], self.hair_choices[self.hair_index], self.blank_component, 0)
+        blank_sprite = Sprite((128, 128), self.background_colour, pygame.transform.scale(self.blank_base, (128, 128)), self.legs_choices[self.legs_index], self.body_choices[self.body_index],
+                                                                                                                       self.hair_choices[self.hair_index], self.blank_component, 0)
+
         blank_sprite.draw()
         return blank_sprite
 
@@ -224,7 +211,6 @@ class CharacterCreation:
         button_legs_back = Button((50, 50), (left, y + 100), (255, 0, 0), self.screen, [self.scroll_components], [["legs", -1]], "foo")
 
         # Save/finish button
-        # button_save = Button((100, 50), (center[0] - 50, center[1] + 200), (0, 0, 255), self.screen, [Sprite.serialize, self.exit], [["player_sprite", self.player_char], None], "foo")
         button_save = Button((100, 50), (center[0] - 50, center[1] + 200), (0, 0, 255), self.screen, [self.finalise_sprite, self.exit], [[], []], "foo")
 
         # Add new buttons to the list of buttons
@@ -240,8 +226,12 @@ class CharacterCreation:
         self.buttons.append(button_save)
 
     def save_component_index(self, save_file):
+        """
+        Creates or overwrites the save file, updating the index position when the player saved their sprite.
 
-        """Creates or overwrites the save file, updating the index position when the player saved their sprite."""
+        Args:
+            save_file (string): The name of the file in which to save the index.
+        """
 
         with open(save_file, "w") as f:
             f.write("hair_index " + str(self.hair_index) + "\n")
@@ -250,8 +240,13 @@ class CharacterCreation:
             f.close()
 
     def read_component_index(self, save_file):
+        """
+        Reads the save file and sets the appropriate index value to the saved values.
 
-        """Reads the save file and sets the appropriate index value to the saved values."""
+        Args:
+            save_file (string): The name of the file to read the index from.
+        """
+
         try:
             with open(save_file) as f:
                 for line in f:
@@ -262,26 +257,28 @@ class CharacterCreation:
             print("No index file found.")
 
     def finalise_sprite(self):
-        self.player_char.update(["background_colour"], [(0, 0, 0, 0)])
-        self.player_char.resize((64, 64))
+        """Gets the sprite ready for serializing. Background is made transparent and the sprite is returned to its original size."""
 
-        Sprite.serialize("player_sprite", self.player_char)
-
-    def finalise_sprite(self):
         self.player_char.update(["background_colour"], [(0, 0, 0, 0)])
         self.player_char.resize((64, 64))
 
         Sprite.serialize("player_sprite", self.player_char)
 
     def exit(self):
-
-        """Closes the character creation window. This could be adapted to lead into the main game."""
+        """Closes the character creation window."""
 
         print("Window Closed")
         self.running = False
 
 
 def load_creation_window(screen):
+    """
+    Instantiates the character creation class and draws the creation window.
+
+    Args:
+        screen (pygame.Display): The display to draw the character creation window on. This will likely be the main game screen.
+    """
+
     images = GetImages("SpriteGeneration/Assets", ".png", (128, 128))
     test_window = CharacterCreation(screen, images.hair, images.body, images.legs)
     test_window.draw_win()
