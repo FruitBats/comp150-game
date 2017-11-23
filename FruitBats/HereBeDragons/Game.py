@@ -51,46 +51,13 @@ class Game:
 
         pygame.display.set_caption('Here Be Dragons')
 
-        menu = GameMenu(self.screen)
-        menu.run()
+        # Init and run main menu
+        self.menu = GameMenu(self.screen)
+        self.menu.run()
 
-        # Init character creation screen if new game is started
-        if menu.new_game:
-            character_creation.load_creation_window(self.screen)
+        # Init game components
+        self.initalise_components()
 
-        # Init map
-        self.map = MapClass(seed=10)
-
-        # Init fog
-        self.fog = Fog(self.t0, 10, 5)
-
-        # Init character
-        self.player = Player(0, 0, self.map)
-        if Sprite.deserialize("player_sprite") is not None:
-            self.player.sprite = Sprite.deserialize("player_sprite").image
-
-        # Init inventory
-        self.invent = Inventory(self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
-
-        # Init health
-        self.health = CurrentHealth()
-
-        # Init objects and player
-        self.objects = list()
-        self.objects.append(self.player)  # player is always the first item
-
-        # Init camera
-        self.camera = Camera(self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
-
-        # Add test Pikachi (Pikachodes?) (plural?)
-        for i in xrange(10):
-            self.objects.append(PikachuStatue(random.randint(0, 10),
-                                              random.randint(0, 10)))        # Add test sword
-        self.objects.append(Swipe(3, 3))
-
-        # self.objects.append(ChaserEnemy(3, 3))  # Testing with new enemy type
-        # self.objects.append(ChaserEnemy(3, 3, self.map))  # Testing with new enemy type
-        # self.objects.append(Enemy(3, 3, 10, self.map))
         # Init main game parameters
         self.start_time = time.clock()
         self.delta_time = 0.0
@@ -161,6 +128,58 @@ class Game:
 
             # Splat to screen
             pygame.display.flip()
+
+    def initalise_components(self):
+        """
+        Initialises the following game components.
+
+        Components:
+            map
+            fog
+            player
+            invent
+            health
+            objects
+            camera
+        """
+
+        # Init character creation screen if new game is started
+        if self.menu.new_game:
+            character_creation.load_creation_window(self.screen)
+
+        # Init map
+        self.map = MapClass(seed=10)
+
+        # Init fog
+        self.fog = Fog(self.t0, 10, 5)
+
+        # Init character
+        self.player = Player(0, 0, self.map)
+        if Sprite.deserialize("player_sprite") is not None:
+            self.player.sprite = Sprite.deserialize("player_sprite").image
+
+        # Init inventory
+        self.invent = Inventory(self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
+
+        # Init health
+        self.health = CurrentHealth()
+
+        # Init objects and player
+        self.objects = list()
+        self.objects.append(self.player)  # player is always the first item
+
+        # Init camera
+        self.camera = Camera(self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
+
+        # Add test Pikachi (Pikachodes?) (plural?)
+        for i in xrange(10):
+            self.objects.append(PikachuStatue(random.randint(0, 10),
+                                              random.randint(0, 10)))        # Add test sword
+        self.objects.append(Swipe(3, 3))
+
+        # self.objects.append(ChaserEnemy(3, 3))  # Testing with new enemy type
+        # self.objects.append(ChaserEnemy(3, 3, self.map))  # Testing with new enemy type
+        # self.objects.append(Enemy(3, 3, 10, self.map))
 
 # Startup game!
 Game()
