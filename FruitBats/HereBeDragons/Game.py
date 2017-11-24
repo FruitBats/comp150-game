@@ -43,6 +43,7 @@ class Game:
         player (Player): Pointer to the player character object.
         map (MapClass): The game map.
         menu (Menu): The main menu.
+        fog (Fog): The fog o' war
 
         quitting (bool): If the application is closing. Set to true when the user closes the program.
         game_over (bool): If the player has lost the game. Set to True when the player dies.
@@ -55,14 +56,14 @@ class Game:
     delta_time = 0  # time passed since last frame
     tick_time = 0   # time at the start of the frame, in seconds since the game started
     start_time = 0  # initial time.clock() value on startup (OS-dependent)
-    t0 = time.time()
 
     screen = None   # PyGame screen
     camera = None   # movable camera object
     objects = None  # list of active objects in the game
     player = None   # pointer to the player object
     map = None      # MapClass object
-    menu = None
+    menu = None     # Menu
+    fog = None
 
     quitting = False
     game_over = False
@@ -95,20 +96,6 @@ class Game:
         fire_time = 0
 
         while not self.quitting:
-
-            # Update timing
-            last_time = self.tick_time
-            self.tick_time = time.clock()
-
-            self.delta_time = self.tick_time - last_time
-
-            # Update fog
-            self.fog.update()
-
-            # Cap delta time to 10FPS to prevent gamebreaking bugs
-            if self.delta_time >= 0.1:
-                self.delta_time = 0.1
-
             # Perform PyGame event loop
             events = pygame.event.get()  # makes event.get a variable so it can be passed to other functions
             for event in events:
@@ -116,6 +103,16 @@ class Game:
                     self.quitting = True
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_f:
                     self.fog_enabled = not self.fog_enabled
+
+            # Update timing
+            last_time = self.tick_time
+            self.tick_time = time.clock()
+
+            self.delta_time = self.tick_time - last_time
+
+            # Cap delta time to 10FPS to prevent gamebreaking bugs
+            if self.delta_time >= 0.1:
+                self.delta_time = 0.1
 
             # Checks if the player's is dead to call game over screen
             if self.health.current_health <= 0:
@@ -132,6 +129,9 @@ class Game:
 
             # Update camera
             self.camera.update(self.delta_time, self.player, self.objects, map)
+
+            # Update fog
+            self.fog.update(self.delta_time)
 
             # Render (todo: move into separate Render class?)
             self.screen.blit(self.map.img, (-self.camera.x * MAP.TILE_SIZE, -self.camera.y * MAP.TILE_SIZE))
@@ -196,7 +196,7 @@ class Game:
         self.map = MapClass(seed=9)
 
         # Init fog
-        self.fog = Fog(self.t0, 10, 5)
+        self.fog = Fog(10, 5)
 
         # Init character
         self.player = Player(MAP.SIZE_X / 2 + 0.5, MAP.SIZE_Y / 2 + 0.5, self.map)

@@ -24,8 +24,9 @@ class Fog:
     day = True
     length_of_day = 0
     length_of_night = 0
+    timer = 0
 
-    def __init__(self, start_time, length_of_day, length_of_night):
+    def __init__(self, length_of_day, length_of_night):
         """
         Class Constructor.
 
@@ -36,9 +37,9 @@ class Fog:
         """
 
         self.surface = self.lift_fog()
-        self.start_time = start_time
         self.length_of_day = length_of_day
         self.length_of_night = length_of_night
+        self.timer = length_of_day
 
     def lift_fog(self):
         """
@@ -88,22 +89,21 @@ class Fog:
 
         return self.surface
 
-    def update(self):
+    def update(self, delta_time):
         """Updates the fog state from day to night and vice versa."""
 
         # Change day to true or false every #seconds, calls fog function to update surface
-        current_time = time.time()
-        interval = current_time - self.start_time  # gets difference between current time and start time
+        self.timer -= delta_time
+        if self.timer <= 0:
+            if self.day:
+                self.day = not self.day
+                self.timer = self.length_of_night # resets timer variable
+                self.lift_fog()
 
-        if self.day and (interval >= self.length_of_day):
-            self.day = not self.day
-            self.start_time = current_time  # resets timer variable
-            self.lift_fog()
-
-        elif not self.day and (interval >= self.length_of_night):
-            self.day = not self.day
-            self.start_time = current_time  # resets timer variable
-            self.lift_fog()
+            else:
+                self.day = not self.day
+                self.timer = self.length_of_day  # resets timer variable
+                self.lift_fog()
 
     def render(self, screen):
         """
