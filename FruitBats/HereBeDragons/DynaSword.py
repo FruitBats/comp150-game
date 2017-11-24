@@ -49,7 +49,10 @@ class DynaSword(Object):
              y: y position to spawn object
              owner (Object): Object that is using the sword.
         """
-        self.sprite = pygame.image.load("graphics/sword.png")
+        sprite = pygame.image.load("graphics/sword.png")
+        sprite = pygame.transform.scale(sprite, (int(sprite.get_width() * MAP.RATIO), int(sprite.get_height() * MAP.RATIO)))
+
+        self.sprite = sprite
         self.x = x
         self.y = y
 
