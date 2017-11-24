@@ -6,7 +6,7 @@ from Characters import Character
 from Helpers import *
 from Collision import CollisionBox
 from DynaSword import DynaSword
-from Projectiles import Arrow
+import Projectiles
 
 
 class Enemy(Character):
@@ -159,7 +159,7 @@ class ArrowEnemy(Enemy):
         # Shoot arrows if it's time
         self.arrow_timer -= delta_time
         if self.arrow_timer <= 0 and distance((player.x, player.y), (self.x, self.y)) < self.detection_range:
-            object_list.append(Arrow((self.x, self.y), (player.x, player.y), 5, map))
+            object_list.append(Projectiles.Arrow((self.x, self.y), (player.x, player.y), 5, map))
             self.arrow_timer = 1 / float(self.arrow_rate)
 
         # Do default enemy stuff

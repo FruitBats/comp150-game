@@ -6,7 +6,6 @@ from sprite import Sprite
 from button import Button
 from get_images import GetImages
 
-
 class CharacterCreation:
 
     # index checking to save the position is probably not necessary. Character creation menu doesn't really need to save user's position
@@ -68,11 +67,10 @@ class CharacterCreation:
     hair_choices_length = 0
     legs_choices_length = 0
 
-    loading = False
     # loading = True
     running = True
 
-    def __init__(self, screen, hair_list, body_list, legs_list):
+    def __init__(self, screen, hair_list, body_list, legs_list, sprite_size):
         """
         Constructor method.
 
@@ -81,6 +79,7 @@ class CharacterCreation:
             hair_list (list of images): The images that can be chosen for the character's head.
             body_list (list of images): The images that can be chosen for the character's body.
             legs_list (list of images): The images that can be chosen for the character's legs.
+            sprite_size (tuple): The size the player sprite should be in game, in pixels.
         """
 
         self.screen = screen
@@ -93,6 +92,8 @@ class CharacterCreation:
         self.body_choices_length = len(self.body_choices)
         self.hair_choices_length = len(self.hair_choices)
         self.legs_choices_length = len(self.legs_choices)
+
+        self.sprite_size = sprite_size
 
         # Get the position in the component lists from the last session.
         self.read_component_index("char_creation_index.txt")
@@ -260,7 +261,7 @@ class CharacterCreation:
         """Gets the sprite ready for serializing. Background is made transparent and the sprite is returned to its original size."""
 
         self.player_char.update(["background_colour"], [(0, 0, 0, 0)])
-        self.player_char.resize((64, 64))
+        self.player_char.resize(self.sprite_size)
 
         Sprite.serialize("player_sprite", self.player_char)
 
@@ -271,16 +272,19 @@ class CharacterCreation:
         self.running = False
 
 
-def load_creation_window(screen):
+def load_creation_window(screen, PLAYER_SCALE):
     """
     Instantiates the character creation class and draws the creation window.
 
     Args:
         screen (pygame.Display): The display to draw the character creation window on. This will likely be the main game screen.
+        PLAYER_SIZE (float): The size of the player. Used to scale the sprites to match the tiles.
     """
 
+    sprite_size = (int(PLAYER_SCALE), int(PLAYER_SCALE))
+
     images = GetImages("SpriteGeneration/Assets", ".png", (128, 128))
-    test_window = CharacterCreation(screen, images.hair, images.body, images.legs)
-    test_window.draw_win()
-    test_window.save_component_index("char_creation_index.txt")
+    creation_window = CharacterCreation(screen, images.hair, images.body, images.legs, sprite_size)
+    creation_window.draw_win()
+    creation_window.save_component_index("char_creation_index.txt")
 

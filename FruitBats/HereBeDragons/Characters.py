@@ -1,7 +1,5 @@
 
 from Objects import Object
-from Helpers import Vector
-from Map import MAP
 
 
 class Character(Object):

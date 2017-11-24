@@ -105,14 +105,10 @@ class Fog:
             self.start_time = current_time  # resets timer variable
             self.lift_fog()
 
-    def render(self, target):
+    def render(self, screen):
         """
         Renders the fog. This whole function is too specific... i.e only works if the target is the main Game class and
         contains a player and camera object.
-
-        Args:
-            target (main Game class): The class to render the fog from.
         """
 
-        target.screen.blit(self.surface, ((target.player.x - target.camera.x) * MAP.TILE_SIZE - int(target.SCREEN_WIDTH * 1.5 - target.player.sprite.get_width() / 2),
-                                          (target.player.y - target.camera.y) * MAP.TILE_SIZE - int(target.SCREEN_HEIGHT * 1.5 - target.player.sprite.get_height() / 2)))
+        screen.blit(self.surface, (-self.SCREEN_WIDTH / 2 + screen.get_width() / 2, -self.SCREEN_HEIGHT / 2 + screen.get_height() / 2))

@@ -14,10 +14,11 @@ class Camera:
 
     def update(self, delta_time, player, object_list, map):
         if player.state == PlayerState.ALIVE:
-            self.x = player.x - (float(self.view_width - player.sprite.get_width())
-                                 / 2 / MAP.TILE_SIZE)
-            self.y = player.y - (float(self.view_height - player.sprite.get_height())
-                                 / 2 / MAP.TILE_SIZE)
+            self.x = player.x + float(-player.sprite.get_width() - self.view_width) / MAP.TILE_SIZE / 2
+            self.y = player.y + float(-player.sprite.get_height() - self.view_height) / MAP.TILE_SIZE / 2
+            if player.sprite_origin is not None:
+                self.x = player.x + (-float(player.sprite_origin.x - player.sprite.get_width() / 2) - (float(self.view_width) / 2)) / MAP.TILE_SIZE
+                self.y = player.y + (-float(player.sprite_origin.y - player.sprite.get_height() / 2) - (float(self.view_height) / 2)) / MAP.TILE_SIZE
 
         if self.x < 0:
             self.x = 0
