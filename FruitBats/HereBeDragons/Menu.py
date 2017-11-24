@@ -1,8 +1,9 @@
 import sys
 import pygame
 
+# setting colors to variables
 WHITE = (255, 255, 255)
-GREEN = (138, 43, 226)  # Not really a green now
+VIOLET = (138, 43, 226)
 BLACK = (0, 0, 0)
 
 
@@ -21,17 +22,20 @@ class MenuItem(pygame.font.Font):
         self.position = pos_x, pos_y
 
     def is_mouse_selection(self, (posx, posy)):
+        # Looks if mouse is in the frames of the game window
         if (posx >= self.pos_x and posx <= self.pos_x + self.width) and \
             (posy >= self.pos_y and posy <= self.pos_y + self.height):
                 return True
         return False
 
     def set_position(self, x, y):
+        # Set position of a mouse
         self.position = (x, y)
         self.pos_x = x
         self.pos_y = y
 
     def set_font_color(self, rgb_tuple):
+        # Sets the font color to the given color
         self.font_color = rgb_tuple
         self.label = self.render(self.text, 1, self.font_color)
 
@@ -41,7 +45,7 @@ class GameMenu:
     running = True
     background_image = None
     new_game = False
-    fullscreen = False
+    full_screen = False
     settings_window = False
 
     def __init__(self, screen, font=None,
@@ -53,15 +57,16 @@ class GameMenu:
         self.background_image = pygame.image.load("ImageFiles/Background1.jpg")
         self.background_image = self.background_image.convert(32)
         self.background_image = pygame.transform.scale(self.background_image,
-                                                       (self.scr_width, self.scr_height))
+                                                       (self.scr_width,
+                                                        self.scr_height))
 
         self.clock = pygame.time.Clock()
         self.menu_items = ('New Game', 'Continue Game',
-                           'Settings', 'Quit')
+                           'Settings', 'Exit')
         self.funcs = {"New Game": GameMenu.start_pressed,
                       "Continue Game": GameMenu.continue_pressed,
                       "Settings": GameMenu.settings,
-                      "Quit": GameMenu.quit_pressed}
+                      "Exit": GameMenu.exit_pressed}
         self.items = []
         key_list = self.funcs.keys()
         for index, item in enumerate(self.menu_items):
@@ -88,14 +93,15 @@ class GameMenu:
         self.running = False
 
     def settings(self):
-        if self.fullscreen is False:
+        if self.full_screen is False:
             self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-            self.fullscreen = True
-        elif self.fullscreen is not False:
-            self.screen = pygame.display.set_mode((self.scr_width, self.scr_height))
-            self.fullscreen = False
+            self.full_screen = True
+        elif self.full_screen is not False:
+            self.screen = pygame.display.set_mode((self.scr_width,
+                                                   self.scr_height))
+            self.full_screen = False
 
-    def quit_pressed(self):
+    def exit_pressed(self):
         sys.exit()
 
     def set_mouse_visibility(self):
@@ -111,7 +117,7 @@ class GameMenu:
         for item in self.items:
             # Return all to neutral
             item.set_italic(False)
-            item.set_font_color(WHITE)
+            item.set_font_color(BLACK)
 
         if self.cur_item is None:
             self.cur_item = 0
@@ -130,10 +136,11 @@ class GameMenu:
                     self.cur_item == len(self.items) - 1:
                 self.cur_item = 0
 
+        # Sets text to italic and violet color if it is chosen
         self.items[self.cur_item].set_italic(True)
-        self.items[self.cur_item].set_font_color(GREEN)
+        self.items[self.cur_item].set_font_color(VIOLET)
 
-        # Finally check if Enter os Space is pressed
+        # Finally check if Enter or Space is pressed
         if key == pygame.K_ESCAPE or \
                 key == pygame.K_RETURN:
             text = self.items[self.cur_item].text
@@ -144,7 +151,7 @@ class GameMenu:
         Marks the MenuItem the mouse cursor hovers on.
         """
         if item.is_mouse_selection(mpos):
-            item.set_font_color(GREEN)
+            item.set_font_color(VIOLET)
             item.set_italic(True)
         else:
             item.set_font_color(BLACK)
@@ -169,6 +176,7 @@ class GameMenu:
                         if item.is_mouse_selection(mouse_position):
                             self.funcs[item.text](self)
 
+            # Sets the mouse visible upon moving
             if pygame.mouse.get_rel() != (0, 0):
                 self.mouse_is_visible = True
                 self.cur_item = None
