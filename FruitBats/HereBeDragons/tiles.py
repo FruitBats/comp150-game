@@ -2,7 +2,8 @@ import pygame
 
 
 class Tile:
-    TILE_SIZE = 80
+    TILE_SIZE = 64
+    PLAYER_SCALE = TILE_SIZE * 0.5
 
     weight = 0
     image = None

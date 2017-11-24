@@ -272,19 +272,19 @@ class CharacterCreation:
         self.running = False
 
 
-def load_creation_window(screen, TILE_SIZE):
+def load_creation_window(screen, PLAYER_SCALE):
     """
     Instantiates the character creation class and draws the creation window.
 
     Args:
         screen (pygame.Display): The display to draw the character creation window on. This will likely be the main game screen.
-        TILE_SIZE (tuple): The size of the map tiles. Used to scale the sprites to match the tiles.
+        PLAYER_SIZE (float): The size of the player. Used to scale the sprites to match the tiles.
     """
 
-    sprite_size = (int(TILE_SIZE[0] * 0.5), int(TILE_SIZE[1] * 0.5))
+    sprite_size = (int(PLAYER_SCALE), int(PLAYER_SCALE))
 
     images = GetImages("SpriteGeneration/Assets", ".png", (128, 128))
-    creation_window = CharacterCreation(screen, images.hair, images.body, images.legs, TILE_SIZE)
+    creation_window = CharacterCreation(screen, images.hair, images.body, images.legs, sprite_size)
     creation_window.draw_win()
     creation_window.save_component_index("char_creation_index.txt")
 
