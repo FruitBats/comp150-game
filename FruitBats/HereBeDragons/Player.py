@@ -37,16 +37,12 @@ class Player(Character):
 
         self.sprite_origin = Vector((size[0] / 2), (size[1] / 2))
         self.collision = CollisionBox((5, 5), (size[0] - 10, size[1] - 10), True)
-        self.hand_x = 4
-        self.hand_y = 52
+        self.hand_x = 4 * MAP.RATIO
+        self.hand_y = 52 * MAP.RATIO
 
         # Do initial spawn
         self.spawn_x = x
         self.spawn_y = y
-
-        # TODO Make dynasword spawn in correct position. Origin and handle need to be scaled correctly.
-        #self.x = x / MAP.RATIO
-        #self.y = y / MAP.RATIO
 
         self.respawn()
 
