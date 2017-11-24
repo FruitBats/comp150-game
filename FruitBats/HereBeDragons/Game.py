@@ -190,7 +190,7 @@ class Game:
 
         # Init character creation screen if new game is started
         if self.menu.new_game:
-            character_creation.load_creation_window(self.screen, (MAP.TILE_SIZE, MAP.TILE_SIZE))
+            character_creation.load_creation_window(self.screen, MAP.PLAYER_SCALE)
 
         # Init map
         self.map = MapClass(seed=10)
@@ -218,9 +218,9 @@ class Game:
         self.camera = Camera(self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
 
         # Add test Pikachi (Pikachodes?) (plural?)
-        for i in xrange(10):
-            self.objects.append(PikachuStatue(random.randint(0, 10), random.randint(0, 10)))        # Add test sword
-        self.objects.append(Swipe(3, 3))
+        #for i in xrange(10):
+            #self.objects.append(PikachuStatue(random.randint(0, 10), random.randint(0, 10)))        # Add test sword
+        #self.objects.append(Swipe(3, 3))
 
         # Spawn test arrow enemies
         for i in xrange(0, 10):

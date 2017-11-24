@@ -32,12 +32,8 @@ class Player(Character):
         self.sprite = pygame.image.load('graphics/game_character.png')
         self.parent_map = parent_map
 
-        # TODO: Louis, does size = (64, 64) determine the size of the collision box? Would it be possible to have it easier to change?
-        # TODO: Maybe set it equal to TILE_SIZE so that the player, objects and tiles all scaled together? - Mango
         # Setup collision box and sprite origin
-        #size = (64, 64)  # Kind of a hack
-        #size = (Tile.TILE_SIZE * 0.5, Tile.TILE_SIZE * 0.5)
-        size = (Tile.TILE_SIZE, Tile.TILE_SIZE)
+        size = (MAP.PLAYER_SCALE, MAP.PLAYER_SCALE)
 
         self.sprite_origin = Vector((size[0] / 2), (size[1] / 2))
         self.collision = CollisionBox((5, 5), (size[0] - 10, size[1] - 10), True)
@@ -47,6 +43,10 @@ class Player(Character):
         # Do initial spawn
         self.spawn_x = x
         self.spawn_y = y
+
+        # TODO Make dynasword spawn in correct position. Origin and handle need to be scaled correctly.
+        #self.x = x / MAP.RATIO
+        #self.y = y / MAP.RATIO
 
         self.respawn()
 

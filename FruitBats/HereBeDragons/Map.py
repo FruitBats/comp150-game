@@ -17,6 +17,8 @@ class MAP:
 
     SEA_CHANCE = 20  # Larger number, lower sea chance
     TILE_SIZE = Tile.TILE_SIZE  # size of game tiles in pixels
+    RATIO = 0.5
+    PLAYER_SCALE = TILE_SIZE * RATIO
     SIZE_Y = 60
     SIZE_X = 60
 
