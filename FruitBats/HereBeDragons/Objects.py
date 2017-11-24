@@ -86,7 +86,7 @@ class Object(object):
         if self.debug_render_hitbox and self.collision:
             # Draw a collision box around the sprite
             # Prepare (potentially rotated) collision box vectors
-            coll_origin = (Vector(self.x, self.y) - camera_vector) * MAP.TILE_SIZE + Vector(self.collision.x, self.collision.y)
+            coll_origin = ((Vector(self.x, self.y) - camera_vector) + Vector(self.collision.x, self.collision.y)) * MAP.TILE_SIZE
 
             if self.sprite_origin:
                 coll_origin -= self.get_right() * self.sprite_origin.x

@@ -13,6 +13,8 @@ class Camera:
         self.view_height = view_height
 
     def update(self, delta_time, player, object_list, map):
+        """Per-frame update: Moves camera to player, capping at the edges of the map
+        See Objects.Object for arguments"""
         if player.state == PlayerState.ALIVE:
             self.x = player.x + float(-player.sprite.get_width() - self.view_width) / MAP.TILE_SIZE / 2
             self.y = player.y + float(-player.sprite.get_height() - self.view_height) / MAP.TILE_SIZE / 2

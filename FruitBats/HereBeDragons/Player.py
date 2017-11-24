@@ -47,9 +47,6 @@ class Player(Character):
 
         self.respawn()
 
-        # Reposition
-        self.debug_render_hitbox = True
-
     def update(self, delta_time, player, object_list, map):
         if self.state == PlayerState.ALIVE:
             # Perform updates

@@ -33,7 +33,7 @@ class Enemy(Character):
 
         self.x = float(x)
         self.y = float(y)
-        self.collision = CollisionBox((10, 7), (37, 72), True)
+        self.collision = CollisionBox((10, 7), (37, 62), True)
         self.sprite_origin = Vector(28, 44)
         self.sprite = pygame.image.load("graphics/enemy.png")
         self.velocity = Vector(0, 0)
