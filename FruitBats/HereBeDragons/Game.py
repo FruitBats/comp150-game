@@ -37,7 +37,6 @@ class Game:
         delta_time (float): Time passed since the last frame.
         tick_time (float): Time at the start of the frame, in seconds since the game started.
         start_time (float): Initial time.clock() value on startup (OS-dependent)
-        t0 (float): Current time.
 
         screen (pygame.Surface): Application screen.
         camera (Camera): The movable game camera.
@@ -66,6 +65,7 @@ class Game:
     map = None      # MapClass object
     menu = None     # Menu
     fog = None
+    fog_enabled = False
 
     quitting = False
     game_over = False

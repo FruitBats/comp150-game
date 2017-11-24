@@ -158,7 +158,7 @@ class ArrowEnemy(Enemy):
     def update(self, delta_time, player, object_list, map):
         # Shoot arrows if it's time
         self.arrow_timer -= delta_time
-        if self.arrow_timer <= 0 and distance((player.x, player.y), (self.x, self.y)) < self.detection_range:
+        if self.arrow_timer <= 0 and distance((player.x, player.y), (self.x, self.y)) < self.detection_range and not self.being_majestic:
             object_list.append(Projectiles.Arrow((self.x, self.y), (player.x, player.y), 5, map))
             self.arrow_timer = 1 / float(self.arrow_rate)
 
