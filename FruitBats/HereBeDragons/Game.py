@@ -26,21 +26,47 @@ from SpriteGeneration import Sprite
 from Objects import *
 
 class Game:
+    """
+    Main Game Class.
+
+    Attributes:
+        SCREEN_WIDTH (int): Width of screen in pixels.
+        SCREEN_HEIGHT (int): Height of screen in pixels.
+
+        delta_time (float): Time passed since the last frame.
+        tick_time (float): Time at the start of the frame, in seconds since the game started.
+        start_time (float): Initial time.clock() value on startup (OS-dependent)
+        t0 (float): Current time.
+
+        screen (pygame.Surface): Application screen.
+        camera (Camera): The movable game camera.
+        objects (list of Objects): A list of all the objects currently in the game. Objects are added and removed from this list when created or destroyed.
+        player (Player): Pointer to the player character object.
+        map (MapClass): The game map.
+        menu (Menu): The main menu.
+
+        quitting (bool): If the application is closing. Set to true when the user closes the program.
+        game_over (bool): If the player has lost the game. Set to True when the player dies.
+        fog_enabled (bool): If the fog of war/day-night cycle is active. Toggled with the f key.
+    """
+
+    SCREEN_WIDTH = 800  # defines screen width
+    SCREEN_HEIGHT = 600  # defines screen height
+
     delta_time = 0  # time passed since last frame
     tick_time = 0   # time at the start of the frame, in seconds since the game started
     start_time = 0  # initial time.clock() value on startup (OS-dependent)
     t0 = time.time()
+
     screen = None   # PyGame screen
     camera = None   # movable camera object
     objects = None  # list of active objects in the game
     player = None   # pointer to the player object
     map = None      # MapClass object
-    quitting = False
     menu = None
-    SCREEN_WIDTH = 800  # defines screen width
-    SCREEN_HEIGHT = 600  # defines screen height
-    game_over = False
 
+    quitting = False
+    game_over = False
     fog_enabled = True  # Enable or disbale fog for testing
 
     def __init__(self):
@@ -175,6 +201,7 @@ class Game:
 
         # Init map
         self.map = MapClass(seed=10)
+        #self.map = MapClass()
 
         # Init fog
         self.fog = Fog(self.t0, 10, 5)

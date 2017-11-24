@@ -67,7 +67,6 @@ class CharacterCreation:
     hair_choices_length = 0
     legs_choices_length = 0
 
-    loading = False
     # loading = True
     running = True
 
@@ -279,9 +278,10 @@ def load_creation_window(screen, TILE_SIZE):
 
     Args:
         screen (pygame.Display): The display to draw the character creation window on. This will likely be the main game screen.
+        TILE_SIZE (tuple): The size of the map tiles. Used to scale the sprites to match the tiles.
     """
 
-    #sprite_size = (int(TILE_SIZE[0] * 0.5), int(TILE_SIZE[1] * 0.5))
+    sprite_size = (int(TILE_SIZE[0] * 0.5), int(TILE_SIZE[1] * 0.5))
 
     images = GetImages("SpriteGeneration/Assets", ".png", (128, 128))
     creation_window = CharacterCreation(screen, images.hair, images.body, images.legs, TILE_SIZE)
