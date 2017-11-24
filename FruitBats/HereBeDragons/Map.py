@@ -20,7 +20,7 @@ class MAP:
     SIZE_Y = 60
     SIZE_X = 60
 
-    POSSIBLE_TILES = [TILE_TYPES.GRASS, TILE_TYPES.GRASS2, TILE_TYPES.MOUNTAIN, TILE_TYPES.ROCK, TILE_TYPES.SPOOKY]
+    POSSIBLE_TILES = [TILE_TYPES.GRASS, TILE_TYPES.GRASS2, TILE_TYPES.MOUNTAIN, TILE_TYPES.MOUNTAIN2, TILE_TYPES.MOUNTAIN3, TILE_TYPES.TOWER, TILE_TYPES.FOREST, TILE_TYPES.FOREST2, TILE_TYPES.FOREST3]
 
 
 class MapClass:
@@ -66,8 +66,6 @@ class MapClass:
                     if rand <= 0 and ndone:
                         ndone = False
                         self.map[x][y] = tile
-
-                print("Map cell " + str(x) + ", " + str(y) + ": " + str(self.map[x][y]))
 
         self.map_render()
         self.create_sea()
