@@ -37,7 +37,8 @@ class Player(Character):
         size = (MAP.PLAYER_SCALE, MAP.PLAYER_SCALE)
 
         self.sprite_origin = Vector((size[0] / 2), (size[1] / 2))
-        self.collision = CollisionBox((5, 5), (size[0] - 10, size[1] - 10), True)
+        self.collision = CollisionBox((5, 5), (size[0] - 10, size[1] - 10),
+                                      True)
         self.hand_x = 4 * MAP.RATIO
         self.hand_y = 52 * MAP.RATIO
 
@@ -54,7 +55,8 @@ class Player(Character):
             self.update_attacks(delta_time, player, object_list, map)
         else:
             # Initiate beauty
-            self.update_majestic_death_animation(delta_time, player, object_list, map)
+            self.update_majestic_death_animation(delta_time, player,
+                                                 object_list, map)
 
     def update_movement(self, delta_time, player, object_list, map):
         # Perform character movement
@@ -89,7 +91,8 @@ class Player(Character):
             deceleration_speed = current_speed / delta_time
 
         if current_speed > 0:
-            move -= self.velocity * (deceleration_speed / self.velocity.length())
+            move -= self.velocity * (deceleration_speed /
+                                     self.velocity.length())
 
         # Accelerate or decelerate accordingly
         self.velocity += move * delta_time
@@ -121,7 +124,8 @@ class Player(Character):
         if pygame.mouse.get_pressed()[1]:
             self.dynasword.boomerang()
 
-    def update_majestic_death_animation(self, delta_time, player, object_list, map):
+    def update_majestic_death_animation(self, delta_time, player,
+                                        object_list, map):
         """Fly majestically. See Object.update for argument info"""
         self.sprite_angle += 1400 * delta_time
         self.move(tuple(self.velocity * delta_time), object_list)
