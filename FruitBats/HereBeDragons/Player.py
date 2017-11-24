@@ -32,8 +32,13 @@ class Player(Character):
         self.sprite = pygame.image.load('graphics/game_character.png')
         self.parent_map = parent_map
 
+        # TODO: Louis, does size = (64, 64) determine the size of the collision box? Would it be possible to have it easier to change?
+        # TODO: Maybe set it equal to TILE_SIZE so that the player, objects and tiles all scaled together? - Mango
         # Setup collision box and sprite origin
-        size = (64, 64)  # Kind of a hack
+        #size = (64, 64)  # Kind of a hack
+        #size = (Tile.TILE_SIZE * 0.5, Tile.TILE_SIZE * 0.5)
+        size = (Tile.TILE_SIZE, Tile.TILE_SIZE)
+
         self.sprite_origin = Vector((size[0] / 2), (size[1] / 2))
         self.collision = CollisionBox((5, 5), (size[0] - 10, size[1] - 10), True)
         self.hand_x = 4

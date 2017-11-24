@@ -67,8 +67,6 @@ class MapClass:
                         ndone = False
                         self.map[x][y] = tile
 
-                print("Map cell " + str(x) + ", " + str(y) + ": " + str(self.map[x][y]))
-
         self.map_render()
         self.create_sea()
         self.img = self.sea_render()
