@@ -133,7 +133,23 @@ class DynaSword(Object):
             # Cap timer to 0
             self.current_attack_timer = 0
 
-        self.collision_tests(object_list)
+        self.collision_tests(object_list)  # err I don't nkow who's doing this but I'll get my own version done just in case this was left behind?
+
+        # Check collisions between the centre line of this sword and characters
+        centre_line_start = self.get_pos_at_pixel((self.sprite.get_width() / 2, self.sprite.get_height()))
+        centre_line_end = self.get_pos_at_pixel((self.sprite.get_width() / 2, 0))
+
+        for obj in object_list:
+            if isinstance(obj, Character):
+                origin = obj.sprite_origin
+
+                if obj.sprite_origin is None:
+                    origin = Vector(0, 0)
+
+                if obj.collision.line_intersection(centre_line_start, centre_line_end, obj.sprite_angle, tuple(origin), (obj.x, obj.y)):
+                    if obj is not self.owner:
+                        # Hurt this character by 10hp for now
+                        obj.hurt(10)
 
     def render(self, screen, camera):
         """Renders the object

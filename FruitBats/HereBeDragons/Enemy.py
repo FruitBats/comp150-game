@@ -1,65 +1,24 @@
+import random
+
 import pygame
 
 from Characters import Character
 from Helpers import *
 from Collision import CollisionBox
 from DynaSword import DynaSword
+from Projectiles import Arrow
 
 
-# Old enemy class
-class ChaserEnemy(Character):
-    detection_range = 5  # range, in tiles, before engaging with player
-    acceleration = 20  # rate of acceleration, in tiles/sec/sec
-    velocity = None  # current speed, as a Vector
-    chasing = False  # whether currently chasing the player or not
-
-    def __init__(self, x, y, parent_map):
-        self.x = float(x)
-        self.y = float(y)
-        self.collision = CollisionBox((10, 1), (39, 72), True)
-        self.sprite = pygame.image.load("graphics/enemy.png")
-        self.velocity = Vector(0, 0)
-        self.parent_map = parent_map
-        self.hand_x = 33
-        self.hand_y = 48
-
-    def update(self, delta_time, player, object_list, map):
-        # Check if the player is in range
-        player_distance = distance((self.x, self.y), (player.x, player.y))
-        if player_distance <= self.detection_range:
-            self.chasing = True
-        else:
-            self.chasing = False
-
-        # Chase the player if close
-        if self.chasing:
-            to_player = Vector(player.x - self.x, player.y - self.y)
-            to_player.normalise(delta_time * self.acceleration * (1 - player_distance / self.detection_range))
-
-            self.velocity += to_player
-
-        # Move according to velocity
-        if not self.move(self.velocity * delta_time, object_list):
-            self.velocity = Vector(0, 0)
-
-
-# New enemy class under testing
 class Enemy(Character):
-
-    """Testing new enemies - Mango"""
-
+    """Base enemy class (Mango)"""
     detection_range = 5  # range, in tiles, before engaging with player
-    attack_range = 2  # range, in tiles, before using an attack
+    attack_range = 2  # range, in tiles, before using an attack (in melee scenarios)
     acceleration = 20  # rate of acceleration, in tiles/sec/sec
     velocity = None  # current speed, as a Vector
-    chasing = False  # whether currently chasing the player or not
+    dynasword = None  # Pointer to dynasword
 
-    dynasword2 = None  # Pointer to dynasword
-
-    # The current position of the player
-    player_x = 0
-    player_y = 0
-    player_distance = 0
+    being_majestic = False  # Whether majestically dying
+    majestic_timer = 1  # Time before majestic dying becomes regular dying
 
     def __init__(self, x, y, hitpoints, parent_map):
 
@@ -74,79 +33,137 @@ class Enemy(Character):
 
         self.x = float(x)
         self.y = float(y)
-        self.hitpoints = hitpoints
-        self.collision = CollisionBox((10, 1), (39, 72), True)
+        self.collision = CollisionBox((10, 7), (37, 72), True)
+        self.sprite_origin = Vector(28, 44)
         self.sprite = pygame.image.load("graphics/enemy.png")
         self.velocity = Vector(0, 0)
+        self.max_health = hitpoints
+        self.health = self.max_health
         self.parent_map = parent_map
+        self.debug_render_hitbox = True
+
+    def default_update(self, delta_time, player, object_list):
+        """Does default enemy updates--you should call this at the end of your enemy update function
+            Args:
+                delta_time: (Float) Time since the last frame in seconds
+                player: (Player) Player instance
+                object_list: (list) Global list of objects
+        """
+        # Die if dying
+        if self.being_majestic:
+            self.update_majestic_death(delta_time)
+
+        # Move according to velocity
+        if not self.move(self.velocity * delta_time, object_list):
+            self.velocity = Vector(0, 0)
+
+    def swipe(self, delta_time, player, object_list):
+        """
+        Default melee attack for enemy
+
+        Args:
+            delta_time (int): Update timing.
+            player (Player): The player object.
+            object_list (list): List of all objects currently in game.
+        """
+
+        if self.dynasword is None:
+            self.dynasword = DynaSword(self.x, self.y, self)
+            object_list.append(self.dynasword)
+
+        # Basic attack
+        self.dynasword.mouse_x = self.player_x
+        self.dynasword.mouse_y = self.player_y
+        self.dynasword.attack()
+
+    def chase_player(self, delta_time, player, object_list, map):
+        to_player = Vector(player.x - self.x, player.y - self.y)
+        to_player.normalise(delta_time * self.acceleration * (1 - self.player_distance / self.detection_range))
+
+        self.velocity += to_player
+
+    def die_majestically(self, timer):
+        """Begins majestic death
+            Args:
+                timer: (Float) Number of seconds during which majestic dying takes place before disappearing"""
+        if not self.being_majestic:
+            self.being_majestic = True
+            self.majestic_timer = timer
+            self.velocity.point_at_angle(random.randrange(0, 360), 8)
+            self.collision.solid = False
+
+    def update_majestic_death(self, delta_time):
+        """Updates majestic death--must be called by Enemies who engage in majestic deaths in their update function
+            Args:
+                delta_time: (Float) Time in seconds since the last frame"""
+        self.sprite_angle += 1300 * delta_time
+        self.majestic_timer -= delta_time
+
+        if self.majestic_timer < 0:
+            self.dead = True  # RIP
+
+    def die(self):
+        # Default death state for enemies
+        self.dead = True
+
+
+class ChaserEnemy(Enemy):
+    """Enemy which chases after the player with a terrifying sword
+        Vars:
+            chasing (Boolean): Whether currently chasing the player
+    """
+    chasing = False
 
     def update(self, delta_time, player, object_list, map):
 
         """
-        Called in main game loop to update the enemy
+        ChaseEnemy update
 
         Args:
-            delta_time (int): Update timing.
+            delta_time (float): Time since the last frame
             player (Player): The player object.
             object_list (list): List of all objects currently in game.
             map (Map): The map object.
         """
 
         # Get the player position and distance from enemy
-        self.player_x = player.x
-        self.player_y = player.y
-        self.player_distance = distance((self.x, self.y), (self.player_x, self.player_y))
+        player_distance = distance((self.x, self.y), (self.player_x, self.player_y))
 
-        # Call chase function if chaser enemy
-        self.chase_player(delta_time, player, object_list, map)
-
-        # Check health
-        if self.hitpoints <= 0:
-            self.die()
+        # Check if the player is in range to chase
+        if self.player_distance <= self.detection_range:
+            # Chase them!
+            self.chase_player(delta_time, player, object_list, map)
 
         # Check if in range to attack
         if self.player_distance <= self.attack_range:
-            self.attack(delta_time, player, object_list)
+            # Attack them!
+            self.swipe(delta_time, player, object_list)
 
-    def attack(self, delta_time, player, object_list):
-        """
-        Default melee attack for enemy.
+        # Do default enemy stuff
+        self.default_update(delta_time, player, object_list)
 
-        Args:
-            delta_time (int): Update timing.
-            player (Player): The player object.
-            object_list (list): List of all objects currently in game.
-        """
+    def die(self):
+        self.die_majestically(2)
 
-        # TODO: Talk to Louis about the DynaSword. Currently, the attack time dictates the angle of the swing.
-        # TODO: Attack time should instead dictate how long the swing takes to complete, regardless of angle.
-        # TODO: Tweak rendering. Currently renders to the enemy, but isnt as precise as it could be.
 
-        if self.dynasword2 is None:
-            self.dynasword2 = DynaSword(self.x, self.y, self)
-            object_list.append(self.dynasword2)
+class ArrowEnemy(Enemy):
+    """Enemy which shoots the player with arrows
+        Vars:
+            arrow_timer (float): Time, in seconds, until next arrow is fired
+            arrow_rate (float): Number of arrows per second shot by this enemy
+    """
+    arrow_timer = 0
+    arrow_rate = 1
 
-        # Basic attack
-        self.dynasword2.mouse_x = self.player_x
-        self.dynasword2.mouse_y = self.player_y
-        self.dynasword2.attack()
+    def update(self, delta_time, player, object_list, map):
+        # Shoot arrows if it's time
+        self.arrow_timer -= delta_time
+        if self.arrow_timer <= 0 and distance((player.x, player.y), (self.x, self.y)) < self.detection_range:
+            object_list.append(Arrow((self.x, self.y), (player.x, player.y), 5, map))
+            self.arrow_timer = 1 / float(self.arrow_rate)
 
-    def chase_player(self, delta_time, player, object_list, map):
-        # Check if the player is in range
+        # Do default enemy stuff
+        self.default_update(delta_time, player, object_list)
 
-        if self.player_distance <= self.detection_range:
-            self.chasing = True
-
-        else:
-            self.chasing = False
-
-        # Chase the player if close
-        if self.chasing:
-            to_player = Vector(player.x - self.x, player.y - self.y)
-            to_player.normalise(delta_time * self.acceleration * (1 - self.player_distance / self.detection_range))
-
-            self.velocity += to_player
-
-        # Move according to velocity
-        if not self.move(self.velocity * delta_time, object_list):
-            self.velocity = Vector(0, 0)
+    def die(self):
+        self.die_majestically(2)
