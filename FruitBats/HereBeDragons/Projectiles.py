@@ -1,7 +1,7 @@
 import random
 #import pygame
 
-from Objects import *
+import Enemy
 from DynaSword import *
 
 
@@ -12,6 +12,7 @@ class Arrow(Object):
     flight_time = 1.5
     tilt_angle = 0
     deflected = False
+    power = 10
 
     def __init__(self, (x, y), (target_x, target_y), speed, parent_map):
         """Initialises an arrow projectile
@@ -36,10 +37,11 @@ class Arrow(Object):
         self.collision = CollisionBox((0, 0), (13, 53), False)
 
         # Arrow properties
-        self.life_time = self.start_life_time
-        self.start_flight_time = (distance((x, y), (target_x, target_y)) + random.randrange(0, 3) * 0.1) / self.velocity.length()
-        self.flight_time = self.start_flight_time
         self.parent_map = parent_map
+
+        # Setup flight time and angle changes
+        self.life_time = self.start_life_time
+        self.start_flight_time = (distance((x, y), (target_x, target_y)) + 0 * 0.1) / self.velocity.length()
 
         if math.sin(math.radians(self.sprite_angle)) < 0:
             self.sprite_angle += 20
@@ -48,21 +50,26 @@ class Arrow(Object):
             self.sprite_angle -= 20
             self.tilt_angle = 20
 
+        self.start_flight_time *= 1.02  # Estimated factor for arc length (hacky, but it works)
+
+        self.flight_time = self.start_flight_time
+
     def update(self, delta_time, player, object_list, map):
         """Frame update function. Fly around all willy-nilly like an arrow. See Object for parameter details."""
         # If not flying, stay in position
         if self.flight_time <= 0:
             self.velocity = Vector(0, 0)
 
+        # Note collision line
+        arrow_start = self.get_pos_at_pixel((6, 0))
+        arrow_end = self.get_pos_at_pixel((6, 53))
+
         if not self.deflected and self.flight_time > 0:
             # While airborne, tilt up and down slightly
-            self.sprite_angle += math.radians(self.tilt_angle * math.sin((self.flight_time / self.start_flight_time) * math.pi))
+            self.sprite_angle += self.tilt_angle * 2 * delta_time / self.start_flight_time
             self.velocity.point_at_angle(self.sprite_angle, self.velocity.length())
 
             # Collide with DynaSwords and deflect
-            arrow_start = self.get_pos_at_pixel((6, 0))
-            arrow_end = self.get_pos_at_pixel((6, 53))
-
             for obj in object_list:
                 if isinstance(obj, DynaSword):
                     if obj.attack_state is not DynaAttack.BLOCKING:
@@ -91,13 +98,25 @@ class Arrow(Object):
 
             if player.collision.line_intersection(arrow_start, arrow_end, player.sprite_angle, tuple(player_origin), (player.x, player.y)):
                 # Hurt the player
-                player.hurt(10)
+                player.hurt(self.power)
                 object_list.remove(self)
                 return
 
         elif self.deflected and self.flight_time > 0:
-            # Spin like mad
-            pass
+            for obj in object_list:
+                if isinstance(obj, Enemy.Enemy):
+                    origin = obj.sprite_origin
+
+                    if origin is None:
+                        origin = Vector(0, 0)
+
+                    if obj.collision.line_intersection(arrow_start, arrow_end, obj.sprite_angle, (origin.x, origin.y), (obj.x, obj.y)):
+                        # Hurt the enemy and land
+                        self.flight_time = 0
+                        obj.hurt(self.power)
+                        break
+
+            # Spin like mad (edit: never mind? precision shots look cooler?)
             #self.sprite_origin = Vector(self.sprite.get_width() / 2, self.sprite.get_height() / 2)
             #self.sprite_angle += random.randrange(3000, 4000) * delta_time
 

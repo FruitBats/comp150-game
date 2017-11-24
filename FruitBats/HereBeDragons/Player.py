@@ -10,6 +10,7 @@ from Map import *
 from Collision import CollisionBox
 from Helpers import *
 from DynaSword import DynaSword
+import Projectiles
 
 
 class PlayerState:

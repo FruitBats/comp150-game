@@ -116,7 +116,7 @@ class Game:
 
             # Render fog
             if self.fog_enabled:
-                self.fog.render(self)
+                self.fog.render(self.screen)
 
             # Draw health bar
             self.health.update()
@@ -167,13 +167,13 @@ class Game:
             character_creation.load_creation_window(self.screen)
 
         # Init map
-        self.map = MapClass(seed=10)
+        self.map = MapClass(seed=9)
 
         # Init fog
         self.fog = Fog(self.t0, 10, 5)
 
         # Init character
-        self.player = Player(0.5, 0.5, self.map)
+        self.player = Player(MAP.SIZE_X / 2 + 0.5, MAP.SIZE_Y / 2 + 0.5, self.map)
         if Sprite.deserialize("player_sprite") is not None:
             self.player.sprite = Sprite.deserialize("player_sprite").image
 
@@ -197,7 +197,7 @@ class Game:
 
         # Spawn test arrow enemies
         for i in xrange(0, 10):
-            self.objects.append(ArrowEnemy(random.randint(0, 20), random.randint(0, 20), 1, self.map))
+            self.objects.append(ArrowEnemy(random.randint(MAP.SIZE_X * 1 / 4, MAP.SIZE_X * 3 / 4), random.randint(MAP.SIZE_Y * 1 / 4, MAP.SIZE_Y * 3 / 4), 1, self.map))
 
         # self.objects.append(ChaserEnemy(3, 3))  # Testing with new enemy type
         # self.objects.append(ChaserEnemy(3, 3, self.map))  # Testing with new enemy type
