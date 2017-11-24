@@ -16,6 +16,7 @@ class Object(object):
     _sprite_angle = 0  # (float) angle of rotation for this sprite in degrees (use the property sprite_angle)
     sprite_origin = None  # (Vector) origin of sprite
     debug_render_hitbox = False  # (Boolean) whether to render the hitbox (for debugging)
+    dead = False  # (Boolean) If true, object will be destroyed and removed from the object list as soon as possible
 
     parent_map = None # The map the object is created on
     debug_dyna = None

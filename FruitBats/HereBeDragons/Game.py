@@ -8,8 +8,7 @@ import pygame
 from Player import Player
 from TestObject import PikachuStatue
 from Attack import Swipe
-from Enemy import ChaserEnemy
-from Enemy import Enemy # Mango testing
+from Enemy import *
 from Map import MapClass, MAP
 from Camera import Camera
 from Menu import *
@@ -101,6 +100,10 @@ class Game:
             for obj in self.objects:
                 obj.update(self.delta_time, self.player, self.objects, map)
 
+                if obj.dead:
+                    # Remove object from existence
+                    self.objects.remove(obj)
+
             # Update camera
             self.camera.update(self.delta_time, self.player, self.objects, map)
 
@@ -120,16 +123,6 @@ class Game:
             self.screen.blit(self.health.health_bar, (5, 5))
             for health1 in range(self.health.current_health):
                 self.screen.blit(self.health.health, (health1 + 7, 7))
-            print self.health.current_health
-
-            # Test fire arrow
-            fire_time -= self.delta_time
-            if fire_time <= 0:
-                fire_time = 1
-                distance = 4
-                ang = random.randrange(0, 360, 1)
-                spawn_pos = (self.player.x + math.sin(math.radians(ang)) * distance, self.player.y + math.cos(math.radians(ang)) * distance)
-                self.objects.append(Arrow(spawn_pos, (self.player.x, self.player.y), random.randrange(4, 6, 1), self.map))
 
             # Update inventory and render
             self.invent.update(events)
@@ -180,7 +173,7 @@ class Game:
         self.fog = Fog(self.t0, 10, 5)
 
         # Init character
-        self.player = Player(1, 1, self.map)
+        self.player = Player(0.5, 0.5, self.map)
         if Sprite.deserialize("player_sprite") is not None:
             self.player.sprite = Sprite.deserialize("player_sprite").image
 
@@ -199,13 +192,16 @@ class Game:
 
         # Add test Pikachi (Pikachodes?) (plural?)
         for i in xrange(10):
-            self.objects.append(PikachuStatue(random.randint(0, 10),
-                                              random.randint(0, 10)))        # Add test sword
+            self.objects.append(PikachuStatue(random.randint(0, 10), random.randint(0, 10)))        # Add test sword
         self.objects.append(Swipe(3, 3))
+
+        # Spawn test arrow enemies
+        for i in xrange(0, 10):
+            self.objects.append(ArrowEnemy(random.randint(0, 20), random.randint(0, 20), 1, self.map))
 
         # self.objects.append(ChaserEnemy(3, 3))  # Testing with new enemy type
         # self.objects.append(ChaserEnemy(3, 3, self.map))  # Testing with new enemy type
-        # self.objects.append(Enemy(3, 3, 10, self.map))
+        self.objects.append(Enemy(3, 3, 10, self.map))
 
 
 # Startup game!
