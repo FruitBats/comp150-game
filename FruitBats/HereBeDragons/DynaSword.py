@@ -61,7 +61,6 @@ class DynaSword(Object):
         self.handle_origin = Vector(self.sprite.get_width() / 3, self.sprite.get_height())
         self.centre_origin = Vector(self.sprite.get_width() / 2, self.sprite.get_height() / 2)
         self.collision = CollisionBox((0, 0), (self.sprite.get_width(), self.sprite.get_height()), False)
-        self.debug_render_hitbox = True
 
     def update(self, delta_time, player, object_list, map):
         """Performs per-frame object update
