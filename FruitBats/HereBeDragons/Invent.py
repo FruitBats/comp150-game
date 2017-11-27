@@ -3,7 +3,8 @@ import pygame
 
 class Inventory:
     """
-    Inventory Class. Unfinished.
+    Inventory Class. Unfinished. When done, this class will be responsible for drawing the inventory screen and tracking which items
+    are currently held by the player. Inventory screen can be opened and closed with "I" key.
 
     Attributes:
         item_list (list of Items): A list all possible items in the game.

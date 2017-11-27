@@ -39,7 +39,6 @@ class CharacterCreation:
         hair_choices_length (int): The length of the hair_choices list.
         legs_choices_length (int): The length of the legs_choices list.
 
-        loading (bool): Sets if the program loads the player_char from a serialized file. Mainly for testing.
         running (bool): State of the pygame window. Window remains open while running is True.
     """
 
@@ -67,7 +66,6 @@ class CharacterCreation:
     hair_choices_length = 0
     legs_choices_length = 0
 
-    # loading = True
     running = True
 
     def __init__(self, screen, hair_list, body_list, legs_list, sprite_size):

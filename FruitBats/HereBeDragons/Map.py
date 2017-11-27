@@ -8,20 +8,25 @@ class MAP:
     Constants for the map.
 
     Attributes:
-        SEA_CHANCE (int): The chance to spawn sea tiles. Larger number is a lower chance.
-        TILE_SIZE (int): The length of each side of a tile in pixels. Tiles are square.
         SIZE_Y (int): The height of the map in tiles.
         Size_X (int): The width of the map in tiles.
+
+        TILE_SIZE (int): The length of each side of a tile in pixels. Tiles are square.
+        RATIO (float): The ratio used to determine PLAYER_SCALE.
+        PLAYER_SCALE (float): The size to which the player and associated objects should be scaled, compared to the map. Allows easy experimentation of scale.
+
+        SEA_CHANCE (int): The chance to spawn sea tiles. Larger number is a lower chance.
         POSSIBLE_TILES (list of Tiles): A list of the possible tiles that can be generated. Tiles are instantiated in TILE_TYPES
     """
 
-    SEA_CHANCE = 20  # Larger number, lower sea chance
-    TILE_SIZE = Tile.TILE_SIZE  # size of game tiles in pixels
-    RATIO = 0.5
-    PLAYER_SCALE = TILE_SIZE * RATIO
     SIZE_Y = 60
     SIZE_X = 60
 
+    TILE_SIZE = Tile.TILE_SIZE  # size of game tiles in pixels
+    RATIO = 0.5
+    PLAYER_SCALE = TILE_SIZE * RATIO
+
+    SEA_CHANCE = 20  # Larger number, lower sea chance
     POSSIBLE_TILES = [TILE_TYPES.GRASS, TILE_TYPES.GRASS2, TILE_TYPES.MOUNTAIN, TILE_TYPES.MOUNTAIN2, TILE_TYPES.MOUNTAIN3, TILE_TYPES.TOWER, TILE_TYPES.FOREST, TILE_TYPES.FOREST2, TILE_TYPES.FOREST3]
 
 
@@ -45,7 +50,7 @@ class MapClass:
         Constructor for MapClass. Creates a map from a seed.
 
         Args:
-            seed (int, optional):  A seed to remember the random map created. Using the same seed to generate a map multiple times will always result in the same map.
+            seed (int, optional): Defaults to 0. A seed to remember the random map created. Using the same seed to generate a map multiple times will always result in the same map.
         """
 
         if not (seed == 0):

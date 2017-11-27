@@ -2,8 +2,18 @@ import pygame
 
 
 class Tile:
+    """
+    Tile class. Contains the data for a single tile on the game map.
+
+    Attributes:
+        TILE_SIZE (int): The size of the tiles in pixels. (Tiles are square)
+
+        weight (int): Higher weighting equals greater chance of a tile being generated.
+        image (pygame.Surface): The image for the tile.
+        walkable (bool): If the tile can be walked on by the player and enemies.
+    """
+
     TILE_SIZE = 64
-    PLAYER_SCALE = TILE_SIZE * 0.5
 
     weight = 0
     image = None
@@ -17,6 +27,7 @@ class Tile:
             weight (int): Spawn weighting.
             image (string): Image file path.
             walkable (bool): If the player can walk on this tile.
+            background_image (string, optional): Defaults to None. The file path for the background image. To be used when the main image has transparent areas.
         """
 
         self.weight = weight
@@ -45,8 +56,8 @@ class TILE_TYPES:
     MOUNTAIN2 = Tile(3, "ImageFiles/sprites test/terrain11.png", False, "ImageFiles/sprites test/terrain2.png")
     MOUNTAIN3 = Tile(3, "ImageFiles/sprites test/terrain12.png", False, "ImageFiles/sprites test/terrain2.png")
 
-    TOWER = Tile(2, "ImageFiles/sprites test/terrain22.png", False, "ImageFiles/sprites test/terrain2.png")  # This could be changed to  be walkable. Too many impassable tiles may break game flow.
+    TOWER = Tile(2, "ImageFiles/sprites test/terrain22.png", False, "ImageFiles/sprites test/terrain2.png")
 
     # Sea tiles
-    SEA = Tile(0, "ImageFiles/Sea/Sea.jpg", False)
+    SEA = Tile(0, "ImageFiles/Sea/Sea.jpg", False)  # TODO: Maybe change this to walkable for the demo, to reduce chances of being trapped by sea.
     BEACH = Tile(0, "ImageFiles/Sea/Sand.jpg", True)
