@@ -1,7 +1,5 @@
 import pygame
-import sys
 
-from Menu import GameMenu
 
 red = (255, 0, 0)
 white = (255, 255, 255)
@@ -11,36 +9,28 @@ pygame.init()
 
 
 class CurrentHealth:
+    """Loads health bar images and updates it when being hit
+    Now it only decreases upon key press.
+    ToDo: set enemies's power AND
+    scale red health bar accordingly to its maximum health
+
+    Attributes:
+        health_bar (pygame.image): red health bar image
+        health (pygame.image): green (current) player's health
+        player_health: manually set player maximum health
+        """
     health_bar = pygame.image.load("ImageFiles/health_bar.png")
     health = pygame.image.load("ImageFiles/health.png")
     player_health = 100
-    smallfont = pygame.font.SysFont("comicsansms", 25)
-    medfont = pygame.font.SysFont("comicsansms", 50)
-    largefont = pygame.font.SysFont("comicsansms", 80)
-    winning = True
 
     def __init__(self, screen):
+        # Setting current player's health to maximum health
         self.current_health = self.player_health
         self.screen = screen
 
-    def text_objects(self, text, color, size):
-        text_surface = None
-
-        if size == "small":
-            text_surface = self.smallfont.render(text, True, color)
-        elif size == "medium":
-            text_surface = self.medfont.render(text, True, color)
-        elif size == "large":
-            text_surface = self.largefont.render(text, True, color)
-
-        return text_surface, text_surface.get_rect()
-
-    def message_to_screen(self, text, color, y_displace=0, size="small"):
-        text_surf, text_rect = self.text_objects(text, color, size)
-        text_rect.center = (800 / 2), (600 / 2) + y_displace
-        self.screen.blit(text_surf, text_rect)
-
     def update(self):
+        # Updates player's current health upon key press
+        # ToDo: set enemies's power instead
         key_pressed = pygame.key.get_pressed()
         if key_pressed[pygame.K_1]:
             self.current_health -= 5
