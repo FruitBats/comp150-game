@@ -40,7 +40,6 @@ class Enemy(Character):
         self.max_health = hitpoints
         self.health = self.max_health
         self.parent_map = parent_map
-        self.debug_render_hitbox = True
 
     def default_update(self, delta_time, player, object_list):
         """Does default enemy updates--you should call this at the end of your enemy update function
