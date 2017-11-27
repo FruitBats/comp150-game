@@ -189,7 +189,7 @@ class Game:
                                                     MAP.PLAYER_SCALE)
 
         # Init map
-        self.map = MapClass(seed=9)
+        self.map = MapClass(seed=6)
 
         # Init fog
         self.fog = Fog(10, 5)
@@ -222,11 +222,8 @@ class Game:
 
         # Spawn test arrow enemies
         for i in xrange(0, 10):
-            self.objects.append(ArrowEnemy(random.randint(MAP.SIZE_X * 1 / 4,
-                                                          MAP.SIZE_X * 3 / 4),
-                                           random.randint(MAP.SIZE_Y * 1 / 4,
-                                                          MAP.SIZE_Y * 3 / 4),
-                                           1, self.map))
+            self.objects.append(ArrowEnemy(random.randint(MAP.SIZE_X * 1 / 4, MAP.SIZE_X * 3 / 4) - 0.5,
+                                           random.randint(MAP.SIZE_Y * 1 / 4, MAP.SIZE_Y * 3 / 4) - 0.5, 1, self.map))
 
         # self.objects.append(ChaserEnemy(3, 3))  # Testing with new enemy type
         # self.objects.append(ChaserEnemy(3, 3, self.map))  # Testing with new enemy type
