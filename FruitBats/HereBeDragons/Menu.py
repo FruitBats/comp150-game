@@ -8,6 +8,17 @@ BLACK = (0, 0, 0)
 
 
 class MenuItem(pygame.font.Font):
+    """
+    Initializes main variables for important functions
+
+    Attributes:
+        text (string): given text
+        font_size: size of a font (default is 30)
+        font_color: color of a font (default is white)
+        label: rendered text with a chosen font_color
+        width and height: label's width and height
+
+    """
     def __init__(self, text, font=None, font_size=30,
                  font_color=WHITE, (pos_x, pos_y)=(0, 0)):
         pygame.font.Font.__init__(self, font, font_size)
@@ -23,6 +34,7 @@ class MenuItem(pygame.font.Font):
 
     def is_mouse_selection(self, (posx, posy)):
         # Looks if mouse is in the frames of the game window
+        # If it is, returns True, otherwise returns False
         if (posx >= self.pos_x and posx <= self.pos_x + self.width) and \
             (posy >= self.pos_y and posy <= self.pos_y + self.height):
                 return True
@@ -41,6 +53,20 @@ class MenuItem(pygame.font.Font):
 
 
 class GameMenu:
+    """
+    Sets given buttons to the main menu screen
+
+    Attributes:
+        screen (pygame.Surface): game's screen given by the main Game file
+        scr_width and scr_height (int): screen's width and height
+        background_image (pygame.image): background image of the main menu
+        menu_items: buttons' names
+        funcs: functions to the given buttons
+        mouse_is_visible: sets mouse visibility whether it is used or not (default is True)
+        cur_item: current selected button (default is None)
+    """
+
+    #
 
     running = True
     background_image = None
@@ -70,6 +96,8 @@ class GameMenu:
         self.items = []
         key_list = self.funcs.keys()
         for index, item in enumerate(self.menu_items):
+            # sets the buttons to the center of the screen
+
             menu_item = MenuItem(item, font, font_size, font_color)
 
             # total height of text block
@@ -85,14 +113,18 @@ class GameMenu:
         self.cur_item = None
 
     def start_pressed(self):
+        # Starts a new game with character creation
         self.new_game = True
         self.running = False
 
     def continue_pressed(self):
+        # Continues the game with the previous seed and progress
         self.new_game = False
         self.running = False
 
     def settings(self):
+        # Sets the screen to full screen
+        # ToDo: make a proper settings with different manageable functions
         if self.full_screen is False:
             self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
             self.full_screen = True
@@ -102,9 +134,12 @@ class GameMenu:
             self.full_screen = False
 
     def exit_pressed(self):
+        # Exits the game
         sys.exit()
 
     def set_mouse_visibility(self):
+        # If the mouse is used - set it visibility to True
+        # If not - set to False
         if self.mouse_is_visible:
             pygame.mouse.set_visible(True)
         else:
@@ -148,7 +183,7 @@ class GameMenu:
 
     def set_mouse_selection(self, item, mpos):
         """
-        Marks the MenuItem the mouse cursor hovers on.
+        Marks the MenuItem when the mouse cursor hovers on.
         """
         if item.is_mouse_selection(mpos):
             item.set_font_color(VIOLET)
@@ -158,6 +193,8 @@ class GameMenu:
             item.set_italic(False)
 
     def run(self):
+        # Main loop for the main menu
+
         self.running = True
         while self.running:
             # Limit frame speed to 50 FPS
@@ -176,7 +213,9 @@ class GameMenu:
                         if item.is_mouse_selection(mouse_position):
                             self.funcs[item.text](self)
 
-            # Sets the mouse visible upon moving
+            # Sets the mouse visible upon moving AND
+            # sets current item (cur_item) to None as
+            # it is used only when using keyboard keys
             if pygame.mouse.get_rel() != (0, 0):
                 self.mouse_is_visible = True
                 self.cur_item = None

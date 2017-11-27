@@ -6,7 +6,8 @@ black = (0, 0, 0)
 
 
 class GameOver:
-    """Displaying a 'game over' screen upon death
+    """
+    Displaying a 'game over' screen upon death
 
     Attributes:
         fonts with different text size

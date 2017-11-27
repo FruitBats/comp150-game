@@ -12,7 +12,8 @@ class Character(Object):
         self.health = health
 
     def hurt(self, damage):
-        """Applies damage to this character and kills if it if dead bro
+        """
+        Applies damage to this character and kills if it if dead bro
             Arguments:
                 damage: (float) Amount of health to chop off
         """
@@ -22,8 +23,10 @@ class Character(Object):
             self.die()
 
     def get_hand_position(self):
-        """Gets this character's absolute wielding hand position in tiles
-            Returns: (Vector) Position, in tiles, of this character's hand"""
+        """
+        Gets this character's absolute wielding hand position in tiles
+            Returns: (Vector) Position, in tiles, of this character's hand
+        """
         return self.get_pos_at_pixel((self.hand_x, self.hand_y))
 
     def die(self):
