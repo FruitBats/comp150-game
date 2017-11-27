@@ -185,11 +185,10 @@ class Game:
 
         # Init character creation screen if new game is started
         if self.menu.new_game:
-            character_creation.load_creation_window(self.screen,
-                                                    MAP.PLAYER_SCALE)
+            character_creation.load_creation_window(self.screen, MAP.PLAYER_SCALE)
 
         # Init map
-        self.map = MapClass(seed=9)
+        self.map = MapClass(seed=9)  # seed=9 This is a good seed.
 
         # Init fog
         self.fog = Fog(10, 5)
