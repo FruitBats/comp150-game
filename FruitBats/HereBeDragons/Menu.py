@@ -8,19 +8,19 @@ BLACK = (0, 0, 0)
 
 
 class MenuItem(pygame.font.Font):
-    """
-    Initializes main variables for important functions
 
-    Attributes:
-        text (string): given text
-        font_size: size of a font (default is 30)
-        font_color: color of a font (default is white)
-        label: rendered text with a chosen font_color
-        width and height: label's width and height
+    def __init__(self, text, font=None, font_size=30, font_color=WHITE, (pos_x, pos_y)=(0, 0)):
+        """
+        Class constructor.
 
-    """
-    def __init__(self, text, font=None, font_size=30,
-                 font_color=WHITE, (pos_x, pos_y)=(0, 0)):
+        Args:
+            text (string): The text to display on this menu item.
+            font (string, optional): Defaults to None. Filename of font to use.
+            font_size (int, optional): Defaults to 30. Size of font to use.
+            font_color (pygame.Color, optional): Defaults to WHITE. Colour of font to use.
+            (pos_x, pos_y) (tuple, optional): Defaults to (0, 0). Position of the menu item on the screen.
+        """
+
         pygame.font.Font.__init__(self, font, font_size)
         self.text = text
         self.font_size = font_size
@@ -33,21 +33,39 @@ class MenuItem(pygame.font.Font):
         self.position = pos_x, pos_y
 
     def is_mouse_selection(self, (posx, posy)):
-        # Looks if mouse is in the frames of the game window
-        # If it is, returns True, otherwise returns False
-        if (posx >= self.pos_x and posx <= self.pos_x + self.width) and \
-            (posy >= self.pos_y and posy <= self.pos_y + self.height):
+        """
+        Looks if mouse is in the frames of the game window. If it is, returns True, otherwise returns False
+
+        Args:
+            (posx, posy) (tuple):X and Y position of mouse.
+        """
+
+        if (posx >= self.pos_x and posx <= self.pos_x + self.width) and (posy >= self.pos_y and posy <= self.pos_y + self.height):
                 return True
+
         return False
 
     def set_position(self, x, y):
-        # Set position of a mouse
+        """
+        Set position of a mouse
+
+        Args:
+            x (int): X position of mouse.
+            y (int): Y position of the mouse.
+        """
+
         self.position = (x, y)
         self.pos_x = x
         self.pos_y = y
 
     def set_font_color(self, rgb_tuple):
-        # Sets the font color to the given color
+        """
+        Sets the font color to the given color
+
+        Args:
+            rgb_tuple (tuple): The rgb of the colour to set the font to.
+        """
+
         self.font_color = rgb_tuple
         self.label = self.render(self.text, 1, self.font_color)
 
@@ -57,25 +75,30 @@ class GameMenu:
     Sets given buttons to the main menu screen
 
     Attributes:
-        screen (pygame.Surface): game's screen given by the main Game file
-        scr_width and scr_height (int): screen's width and height
-        background_image (pygame.image): background image of the main menu
-        menu_items: buttons' names
-        funcs: functions to the given buttons
-        mouse_is_visible: sets mouse visibility whether it is used or not (default is True)
-        cur_item: current selected button (default is None)
+        running (bool): If the game is running.
+        background_image (pygame.image): Background image of the main menu
+        new_game (bool): If a new game has been started.
+        full_screen (bool): If the game is in full screen mode.
+        settings_window (bool): If the settings window has been opened.
     """
-
-    #
-
+    
     running = True
     background_image = None
     new_game = False
     full_screen = False
     settings_window = False
 
-    def __init__(self, screen, font=None,
-                 font_size=30, font_color=WHITE):
+    def __init__(self, screen, font=None, font_size=30, font_color=WHITE):
+        """
+        Class constructor.
+
+        Args:
+            screen (pygame.Surface): The screen on which to draw the menu.
+            font (string, optional): Defaults to None. Filename of font for menu text.
+            font_size (int, optional): Defaults to 30. Size of font for menu text.
+            font_color (pygame.Color, optonal): Defaults to WHITE. Colour for the menu text.
+        """
+
         self.screen = screen
         self.scr_width = self.screen.get_rect().width
         self.scr_height = self.screen.get_rect().height
@@ -113,16 +136,20 @@ class GameMenu:
         self.cur_item = None
 
     def start_pressed(self):
-        # Starts a new game with character creation
+        """Starts a new game with character creation"""
+
         self.new_game = True
         self.running = False
 
     def continue_pressed(self):
-        # Continues the game with the previous seed and progress
+        """Continues the game with the previous seed and progress"""
+
         self.new_game = False
         self.running = False
 
     def settings(self):
+        """The settings menu. Currently just changes the game window to fullscreen."""
+
         # Sets the screen to full screen
         # ToDo: make a proper settings with different manageable functions
         if self.full_screen is False:
@@ -134,10 +161,13 @@ class GameMenu:
             self.full_screen = False
 
     def exit_pressed(self):
-        # Exits the game
+        """Exits the game"""
+
         sys.exit()
 
     def set_mouse_visibility(self):
+        """Changes the visibility of the mouse cursor."""
+
         # If the mouse is used - set it visibility to True
         # If not - set to False
         if self.mouse_is_visible:
@@ -147,7 +177,10 @@ class GameMenu:
 
     def set_item_selection(self, key):
         """
-        Marks the MenuItem chosen via up and down keys
+        Marks the MenuItem chosen via up and down keys.
+
+        Args:
+            key (event.key): The key being pressed.
         """
         for item in self.items:
             # Return all to neutral
@@ -184,6 +217,10 @@ class GameMenu:
     def set_mouse_selection(self, item, mpos):
         """
         Marks the MenuItem when the mouse cursor hovers on.
+
+        Args:
+            item (MenuItem): Menu item the mouse is over.
+            mpos (tuple): Mouse cursor coordinates.
         """
         if item.is_mouse_selection(mpos):
             item.set_font_color(VIOLET)
@@ -193,7 +230,7 @@ class GameMenu:
             item.set_italic(False)
 
     def run(self):
-        # Main loop for the main menu
+        """Main loop for the main menu"""
 
         self.running = True
         while self.running:
