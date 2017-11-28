@@ -16,6 +16,7 @@ class Fog:
         day (bool): State of the day. True if day, False if night.
         length_of_day (int): Length of a day in seconds.
         length_of_night (int): Length of a night in seconds.
+        timer (int): Timer for fog changes.
     """
 
     SCREEN_WIDTH = 800*3
@@ -31,7 +32,6 @@ class Fog:
         Class Constructor.
 
         Args:
-            start_time (float): The initial start time of the game.
             length_of_day (int): The length of a day in seconds.
             length_of_night (int): The length of a night in seconds.
         """
@@ -55,42 +55,29 @@ class Fog:
         # TODO: Nightime iterates from radius to 1, stepping down alpha at the same time. This works ok for night, but not for daytime, as it doesnt have a good cutoff.
         if self.day:
             self.surface.fill((220, 220, 220, 255))
-            m = 255 / float(350)  # float used to multiply i increasing the alpha must be close to range to avoid alpha being higher than 255
-            alpha = 255
 
-            """
-            for i in range(450, 1, -1):  # loop starts at first number and counts down by 1 until at 1
-                pygame.draw.circle(self.surface, (220, 220, 220, i * m), (self.SCREEN_WIDTH / 2, self.SCREEN_HEIGHT / 2), i)
-            """
-
-            #"""
             radius = 450
             for alpha in range(255, 1, -4):
                 radius -= 2
                 pygame.draw.circle(self.surface, (220, 220, 220, alpha), (self.SCREEN_WIDTH / 2, self.SCREEN_HEIGHT / 2), int(radius))
-            #"""
 
         else:
             self.surface.fill((0, 13, 26, 255))
             m = 255 / float(150)
 
-            """
-            radius = 500
-            for alpha in range(255, 1, -0.5):
-                radius -= 1
-                pygame.draw.circle(self.surface, (0, 13, 26, alpha), (self.SCREEN_WIDTH / 2, self.SCREEN_HEIGHT / 2), int(radius))
-            """
-
-            #"""
             for i in range(150, 1, -1):
                 alpha = i*m
                 pygame.draw.circle(self.surface, (0, 13, 26, i * m), (self.SCREEN_WIDTH / 2, self.SCREEN_HEIGHT / 2), i)
-            #"""
 
         return self.surface
 
     def update(self, delta_time):
-        """Updates the fog state from day to night and vice versa."""
+        """
+        Updates the fog state from day to night and vice versa.
+
+        Args:
+            delta_time (float): Time passed since last frame.
+        """
 
         # Change day to true or false every #seconds, calls fog function to update surface
         self.timer -= delta_time
@@ -109,6 +96,9 @@ class Fog:
         """
         Renders the fog. This whole function is too specific... i.e only works if the target is the main Game class and
         contains a player and camera object.
+
+        Args:
+            screen (pygame.Surface): The screen to draw the fog on.
         """
 
         screen.blit(self.surface, (-self.SCREEN_WIDTH / 2 + screen.get_width() / 2, -self.SCREEN_HEIGHT / 2 + screen.get_height() / 2))

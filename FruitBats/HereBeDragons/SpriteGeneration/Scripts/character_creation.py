@@ -171,6 +171,7 @@ class CharacterCreation:
         if (index >= list_length) or (index <= -list_length):
             print("Index at max! " + str(list_length))
             index = 0
+
         else:
             print("Index = " + str(index))
 
@@ -191,7 +192,7 @@ class CharacterCreation:
 
         # Whole section is messy. Perhaps make ScrollButton an object that inherits from Button with initial size, colour, function etc?
 
-        # Create new buttons
+        # Get general positions for buttons.
         center = (self.size[0] / 2), (self.size[1] / 2)
         right = (self.char_position[0] + 150)
         left = (self.char_position[0] - 100)

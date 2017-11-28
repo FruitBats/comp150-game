@@ -117,7 +117,6 @@ class Game:
             if self.delta_time >= 0.1:
                 self.delta_time = 0.1
 
-
             # Checks if the player's is dead to call "game over" screen
             game_over = GameOver(self.SCREEN_WIDTH,
                                  self.SCREEN_HEIGHT,

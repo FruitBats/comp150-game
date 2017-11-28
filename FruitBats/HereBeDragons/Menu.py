@@ -81,7 +81,7 @@ class GameMenu:
         full_screen (bool): If the game is in full screen mode.
         settings_window (bool): If the settings window has been opened.
     """
-    
+
     running = True
     background_image = None
     new_game = False
