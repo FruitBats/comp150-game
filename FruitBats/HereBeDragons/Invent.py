@@ -41,6 +41,7 @@ class Inventory:
             width (int): The width of the inventory screen in pixels.
             height (int): The height of the inventory screen in pixels.
         """
+
         self.invent_screen = pygame.Surface((width, height))
         self.invent_screen.fill((0, 0, 0))
         self.invent_screen.set_colorkey((0, 0, 0))
