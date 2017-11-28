@@ -10,25 +10,33 @@ import Projectiles
 
 
 class Enemy(Character):
-    """Base enemy class (Mango)"""
-    detection_range = 5  # range, in tiles, before engaging with player
-    attack_range = 2  # range, in tiles, before using an attack (in melee scenarios)
-    acceleration = 20  # rate of acceleration, in tiles/sec/sec
-    velocity = None  # current speed, as a Vector
-    dynasword = None  # Pointer to dynasword
+    """Base enemy class (Mango)
 
-    being_majestic = False  # Whether majestically dying
-    majestic_timer = 1  # Time before majestic dying becomes regular dying
+    Attributes:
+        detection_range (float): Range from the player, in tile units, before engaging with the player
+        attack_range (float): Range from the player, in tile units, before using a melee attack (if applicable)
+        acceleration (float): Rate of movement acceleration, in tiles/sec/sec
+        velocity (Vector): Speed of the enemy, in tiles/sec
+        dynasword (DynaSword): The DynaSword owned by this enemy, if applicable
+        being_majestic (Boolean): Whether or not the enemy is currently majestically dying
+        majestic_timer (float): Time, in seconds, before majestic death becomes regular death
+    """
+    detection_range = 5
+    attack_range = 2
+    acceleration = 20
+    velocity = None
+    dynasword = None
 
-    def __init__(self, x, y, hitpoints, parent_map):
+    being_majestic = False
+    majestic_timer = 1
 
-        """
-        Constructor
+    def __init__(self, (x, y), hitpoints, parent_map):
+        """Spawns an enemy with a certain amount of hit points
 
         Args:
-            x (int): x position to spawn.
-            y (int): y position to spawn.
-            hitpoints (int): Number of hitpoints for the enemy.
+            (x, y) (float): Position to spawn, in tile unuits
+            hitpoints (int): Number of hitpoints to spawn with
+            parent_map (MapClass): Map wherein this enemy lives
         """
 
         self.x = float(x)
@@ -43,10 +51,11 @@ class Enemy(Character):
 
     def default_update(self, delta_time, player, object_list):
         """Does default enemy updates--you should call this at the end of your enemy update function
-            Args:
-                delta_time: (Float) Time since the last frame in seconds
-                player: (Player) Player instance
-                object_list: (list) Global list of objects
+
+        Args:
+            delta_time: (Float) Time since the last frame in seconds
+            player: (Player) Player instance
+            object_list: (list) Global list of objects
         """
         # Die if dying
         if self.being_majestic:
@@ -57,8 +66,7 @@ class Enemy(Character):
             self.velocity = Vector(0, 0)
 
     def swipe(self, delta_time, player, object_list):
-        """
-        Default melee attack for enemy
+        """Performs default DynaSword melee attack
 
         Args:
             delta_time (int): Update timing.
@@ -71,11 +79,17 @@ class Enemy(Character):
             object_list.append(self.dynasword)
 
         # Basic attack
-        self.dynasword.mouse_x = self.player_x
-        self.dynasword.mouse_y = self.player_y
+        self.dynasword.mouse_x = player.x
+        self.dynasword.mouse_y = player.y
         self.dynasword.attack()
 
-    def chase_player(self, delta_time, player, object_list, map):
+    def chase_player(self, delta_time, player):
+        """Accelerates toward the player
+
+        Args:
+            delta_time (float): Time, in seconds, since last frame
+            player (Player): The player who shall be murdered by this noble enemy
+        """
         to_player = Vector(player.x - self.x, player.y - self.y)
         to_player.normalise(delta_time * self.acceleration * (1 - self.player_distance / self.detection_range))
 
@@ -83,8 +97,9 @@ class Enemy(Character):
 
     def die_majestically(self, timer):
         """Begins majestic death
-            Args:
-                timer: (Float) Number of seconds during which majestic dying takes place before disappearing"""
+
+        Args:
+            timer: (Float) Number of seconds during which majestic dying takes place before disappearing"""
         if not self.being_majestic:
             self.being_majestic = True
             self.majestic_timer = timer
@@ -102,39 +117,31 @@ class Enemy(Character):
             self.dead = True  # RIP
 
     def die(self):
-        # Default death state for enemies
+        """Begins death sequence for enemy"""
         self.dead = True
 
 
 class ChaserEnemy(Enemy):
     """Enemy which chases after the player with a terrifying sword
-        Vars:
-            chasing (Boolean): Whether currently chasing the player
+
+    Attributes:
+        chasing (Boolean): Whether currently chasing the player
     """
     chasing = False
 
     def update(self, delta_time, player, object_list, map):
-
-        """
-        ChaseEnemy update
-
-        Args:
-            delta_time (float): Time since the last frame
-            player (Player): The player object.
-            object_list (list): List of all objects currently in game.
-            map (Map): The map object.
-        """
+        """Update, scans surroundings and chases players that come near. Overrides Object.update."""
 
         # Get the player position and distance from enemy
         player_distance = distance((self.x, self.y), (self.player_x, self.player_y))
 
         # Check if the player is in range to chase
-        if self.player_distance <= self.detection_range:
+        if player_distance <= self.detection_range:
             # Chase them!
-            self.chase_player(delta_time, player, object_list, map)
+            self.chase_player(delta_time, player)
 
         # Check if in range to attack
-        if self.player_distance <= self.attack_range:
+        if player_distance <= self.attack_range:
             # Attack them!
             self.swipe(delta_time, player, object_list)
 
@@ -142,19 +149,22 @@ class ChaserEnemy(Enemy):
         self.default_update(delta_time, player, object_list)
 
     def die(self):
+        """Overrides Enemy.die"""
         self.die_majestically(2)
 
 
 class ArrowEnemy(Enemy):
     """Enemy which shoots the player with arrows
-        Vars:
-            arrow_timer (float): Time, in seconds, until next arrow is fired
-            arrow_rate (float): Number of arrows per second shot by this enemy
+
+    Attributes:
+        arrow_timer (float): Time, in seconds, until next arrow is fired
+        arrow_rate (float): Number of arrows per second shot by this enemy
     """
     arrow_timer = 0
     arrow_rate = 1
 
     def update(self, delta_time, player, object_list, map):
+        """Scans around for nearby players and chases them. Overrides Object.update"""
         # Shoot arrows if it's time
         self.arrow_timer -= delta_time
         if self.arrow_timer <= 0 and distance((player.x, player.y), (self.x, self.y)) < self.detection_range and not self.being_majestic:
@@ -165,4 +175,5 @@ class ArrowEnemy(Enemy):
         self.default_update(delta_time, player, object_list)
 
     def die(self):
+        """Overrides Enemy.die"""
         self.die_majestically(2)

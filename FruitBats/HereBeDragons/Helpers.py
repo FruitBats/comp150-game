@@ -1,18 +1,34 @@
 import math
 
 
-class Vector():
+class Vector:
     """Vector container class for xy coordinates
-       Can also be used as a tuple."""
+       Can be converted to a tuple using tuple()
+
+       Attributes:
+           x, y (float): Vector coordinates"""
     x = 0.0
     y = 0.0
+
+    def __init__(self, x, y):
+        """Initialises the vector with components
+        Args:
+            x (float): Initial X component
+            y (float): Initial Y component
+        """
+        self.x = float(x)
+        self.y = float(y)
 
     def dot(self, other):
         """Returns the dot product of two Vectors as a float"""
         return float(self.x) * other.x + float(self.y) * other.y
 
     def normalise(self, value=1.0):
-        """Scales the vector so that its length = value"""
+        """Scales the vector so that its length = value
+
+        Args:
+            value (float): The length to scale the vector to
+        """
         length = math.sqrt(self.x * self.x + self.y * self.y)
 
         if length > 0:
@@ -28,9 +44,10 @@ class Vector():
 
     def point_at_angle(self, angle, length):
         """Points the vector towards 'angle' with a specified length
-            Arguments:
-                angle (float): Angle of vector, in degrees
-                length (float): Length of the vector
+
+        Args:
+            angle (float): Angle of vector, in degrees
+            length (float): Length of the vector
         """
         self.x = -math.sin(math.radians(angle)) * length
         self.y = -math.cos(math.radians(angle)) * length
@@ -38,16 +55,28 @@ class Vector():
     @staticmethod
     def to_angle(angle, length):
         """Returns a new vector pointing toward an angle
-            Arguments:
-                angle (float): Angle of the new vector, in degrees
-                length (float): Length of the new vector
-            Returns:
-                (Vector) A vector pointing toward an angle with magnitude 'length'"""
+
+        Args:
+            angle (float): Angle of the new vector, in degrees
+            length (float): Length of the new vector
+        Returns:
+            (Vector) A vector pointing toward an angle with magnitude 'length'
+        """
         return Vector(-math.sin(math.radians(angle)) * length, -math.cos(math.radians(angle)) * length)
 
     @staticmethod
     def intersection(start1, end1, start2, end2):
-        """Checks two lines between Vector points start1, end1 and start2, end2, and returns whether they intersect (boolean)"""
+        """Checks two lines between Vector points start1, end1 and start2, end2, and returns whether they intersect (boolean)
+
+        Args:
+            start1 (Vector): Starting point of the first line
+            end1 (Vector): Ending point of the first line
+            start2 (Vector): Starting point of the second line
+            end2 (Vector): Ending point of the second line
+
+        Returns:
+            (Boolean) Whether the lines intersect
+        """
         opp = Vector(-(end2.y - start2.y), end2.x - start2.x)
         opp.normalise()
 
@@ -63,10 +92,6 @@ class Vector():
             return True
         else:
             return False
-
-    def __init__(self, x, y):
-        self.x = float(x)
-        self.y = float(y)
 
     def __add__(self, vec):
         """Adds two vectors"""
@@ -97,7 +122,14 @@ class Vector():
 # Global functions for simple math tasks
 # Functions accepting tuples can also accept vectors
 def distance((x1, y1), (x2, y2)):
-    """Returns: (float) the distance between two points"""
+    """Gets the distance between two points.
+
+    Args:
+        (x1, y1) (float): Position of the first point
+        (x2, y2) (float): Position of the second point
+    Returns:
+        (float) The distance between the two points
+    """
     return math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))
 
 

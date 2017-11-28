@@ -3,18 +3,30 @@ from Player import *
 
 
 class Camera:
-    x = 0            # x in tiles
-    y = 0            # y in tiles
-    view_width = 0   # viewport width in pixels
-    view_height = 0  # viewport height in pixels
+    """Camera object, defining the position and proportions of the camera in the game world.
 
-    def __init__(self, view_width, view_height):
+        Attributes:
+            x, y (float): Coordinates of the camera, measured in tiles
+            view_width, view_height (float): Dimensions of the viewport, in pixels
+    """
+    x = 0
+    y = 0
+    view_width = 0
+    view_height = 0
+
+    def __init__(self, (view_width, view_height)):
+        """Sets up the camera
+            Args:
+                (view_width, view_height): Dimensions of the camera viewport
+        """
         self.view_width = view_width
         self.view_height = view_height
 
-    def update(self, delta_time, player, object_list, map):
+    def update(self, player):
         """Per-frame update: Moves camera to player, capping at the edges of the map
-        See Objects.Object for arguments"""
+            Args:
+                player (Player reference): The player
+        """
         if player.state == PlayerState.ALIVE:
             self.x = player.x + float(-player.sprite.get_width() - self.view_width) / MAP.TILE_SIZE / 2
             self.y = player.y + float(-player.sprite.get_height() - self.view_height) / MAP.TILE_SIZE / 2

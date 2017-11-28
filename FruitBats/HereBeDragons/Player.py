@@ -10,25 +10,37 @@ from Map import *
 from Collision import CollisionBox
 from Helpers import *
 from DynaSword import DynaSword
-import Projectiles
 
 
 class PlayerState:
+    """State constants for the player, currently wanted DEAD or ALIVE"""
     ALIVE = 0
     DEAD = 1
 
 
 class Player(Character):
-    state = PlayerState.ALIVE  # (PlayerState const) Current state
-    max_speed = 7.0  # (float) The maximum running speed, in tiles/sec
-    acceleration = 35.0  # (float) Rate of acceleration while running, in tiles/sec/sec
-    friction = 70.0  # (float) Rate of slowdown when releasing movement keys
-    velocity = None  # (Vector) Rate of movement per axis in tiles/sec
-    dynasword = None  # (DynaSword) Pointer to dynasword
-    respawn_timer = 0  # (float) Current time til respawn in seconds
+    """
+    Main player character class
+
+    Attributes:
+        state (PlayerState constant): State of the player, usually just ALIVE or DEAD
+        max_speed (float): Maximum speed of the player, in tiles/sec
+        acceleration (float): Acceleration of player when they move, in tiles/sec/sec
+        friction (float): Slowdown rate when the player lets go of the movement keys, in tiles/sec/sec
+        dynasword (DynaSword reference): The player's DynaSword in hand
+        respawn_timer (float): Time in seconds before respawn during PlayerState.DEAD state
+    """
+
+    state = PlayerState.ALIVE
+    max_speed = 7.0
+    acceleration = 35.0
+    friction = 70.0
+    velocity = None
+    dynasword = None
+    respawn_timer = 0
 
     def __init__(self, x, y, parent_map):
-        """Init: Loads default player sprite and scales it up"""
+        """Init: Overrides Object.init. Loads default player sprite, scales it up and initialises character parameters."""
         # Load character image
         self.sprite = pygame.image.load('graphics/game_character.png')
         self.parent_map = parent_map
@@ -37,8 +49,7 @@ class Player(Character):
         size = (MAP.PLAYER_SCALE, MAP.PLAYER_SCALE)
 
         self.sprite_origin = Vector((size[0] / 2), (size[1] / 2))
-        self.collision = CollisionBox((5, 5), (size[0] - 10, size[1] - 10),
-                                      True)
+        self.collision = CollisionBox((5, 5), (size[0] - 10, size[1] - 10), True)
         self.hand_x = 4 * MAP.RATIO
         self.hand_y = 52 * MAP.RATIO
 
@@ -49,16 +60,21 @@ class Player(Character):
         self.respawn()
 
     def update(self, delta_time, player, object_list, map):
+        """Overrides Object.update. Makes player move, attack and collide"""
         if self.state == PlayerState.ALIVE:
             # Perform updates
-            self.update_movement(delta_time, player, object_list, map)
-            self.update_attacks(delta_time, player, object_list, map)
+            self.update_movement(delta_time, object_list)
+            self.update_attacks(object_list)
         else:
             # Initiate beauty
-            self.update_majestic_death_animation(delta_time, player,
-                                                 object_list, map)
+            self.update_majestic_death_animation(delta_time, object_list)
 
-    def update_movement(self, delta_time, player, object_list, map):
+    def update_movement(self, delta_time, object_list):
+        """Updates the player's movement, responding to keyboard input and handling collisions.
+            Args:
+                delta_time (float): Time passed since last frame, in seconds
+                object_list (list): List of objects in world
+        """
         # Perform character movement
         key_pressed = pygame.key.get_pressed()
 
@@ -91,8 +107,7 @@ class Player(Character):
             deceleration_speed = current_speed / delta_time
 
         if current_speed > 0:
-            move -= self.velocity * (deceleration_speed /
-                                     self.velocity.length())
+            move -= self.velocity * (deceleration_speed / self.velocity.length())
 
         # Accelerate or decelerate accordingly
         self.velocity += move * delta_time
@@ -108,7 +123,11 @@ class Player(Character):
         if not moved:
             self.velocity = Vector(0, 0)
 
-    def update_attacks(self, delta_time, player, object_list, map):
+    def update_attacks(self, object_list):
+        """Updates the player's attacks, responding to mouse input.
+            Args:
+                object_list (list): List of objects in world
+        """
         # Create sword
         # TODO: Consult Michael about this. There should be a way to call
         # game.CreateObject or something like that. Should be done on init.
@@ -124,9 +143,12 @@ class Player(Character):
         if pygame.mouse.get_pressed()[1]:
             self.dynasword.boomerang()
 
-    def update_majestic_death_animation(self, delta_time, player,
-                                        object_list, map):
-        """Fly majestically. See Object.update for argument info"""
+    def update_majestic_death_animation(self, delta_time, object_list):
+        """Fly majestically during death.
+            Args:
+                delta_time (float): Time passed since last frame, in seconds
+                object_list (list): List of objects in world
+        """
         self.sprite_angle += 1400 * delta_time
         self.move(tuple(self.velocity * delta_time), object_list)
 
@@ -136,7 +158,7 @@ class Player(Character):
             self.respawn()
 
     def die(self):
-        """Called on player death"""
+        """Called on player death. Sets player state to DEAD."""
         if self.state == PlayerState.ALIVE:
             # Change player state to dead, reconstruct that famous Titanic scene and and setup respawn variables
             self.state = PlayerState.DEAD
@@ -145,7 +167,7 @@ class Player(Character):
             self.collision.solid = False
 
     def respawn(self):
-        """Respawn function, automatically called after a player has died"""
+        """Respawns the player. Automatically called after a player has finished dying majestically."""
         self.max_health = 1
         self.health = self.max_health
         self.state = PlayerState.ALIVE

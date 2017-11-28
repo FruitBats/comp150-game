@@ -1,13 +1,7 @@
 # Todo: Clean up unused imports
 import time
-import random
-import math
-
-import pygame
 
 from Player import Player
-from TestObject import PikachuStatue
-from Attack import Swipe
 from Enemy import *
 from Map import MapClass, MAP
 from Camera import Camera
@@ -15,11 +9,8 @@ from Menu import *
 from Invent import *
 from Fog import Fog
 
-from Characters import Character
 from Health import *
 from Game_Over import GameOver
-from Projectiles import Arrow
-from Helpers import Vector
 from SpriteGeneration import character_creation
 from SpriteGeneration import Sprite
 
@@ -79,8 +70,7 @@ class Game:
            To be called on startup."""
         # Init Python
         pygame.init()
-        self.screen = pygame.display.set_mode((self.SCREEN_WIDTH,
-                                               self.SCREEN_HEIGHT))
+        self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
 
         pygame.display.set_caption('Here Be Dragons')
 
@@ -117,12 +107,9 @@ class Game:
             if self.delta_time >= 0.1:
                 self.delta_time = 0.1
 
-
             # Checks if the player's is dead to call "game over" screen
-            game_over = GameOver(self.SCREEN_WIDTH,
-                                 self.SCREEN_HEIGHT,
-                                 self.screen,
-                                 self.in_game)
+            game_over = GameOver(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.screen, self.in_game)
+
             if self.health.current_health <= 0:
                 self.in_game = False
                 game_over.game_over()
@@ -136,19 +123,21 @@ class Game:
                     self.objects.remove(obj)
 
             # Update camera
-            self.camera.update(self.delta_time, self.player,
-                               self.objects, map)
+            self.camera.update(self.player)
 
             # Update fog
             self.fog.update(self.delta_time)
 
-            # Render (todo: move into separate Render class?)
-            self.screen.blit(self.map.img, (-self.camera.x * MAP.TILE_SIZE,
-                                            -self.camera.y * MAP.TILE_SIZE))
+            # Begin render
+            # Render map
+            self.screen.blit(self.map.img, (-self.camera.x * MAP.TILE_SIZE, -self.camera.y * MAP.TILE_SIZE))
 
+            # Render the player
+            self.player.render(self.screen, self.camera)
+
+            # Render objects
             for obj in self.objects:
                 obj.render(self.screen, self.camera)
-            self.player.render(self.screen, self.camera)
 
             # Render fog
             if self.fog_enabled:
@@ -162,9 +151,7 @@ class Game:
 
             # Update inventory and render
             self.invent.update(events)
-            self.invent.render_invent(self.screen,
-                                      self.SCREEN_WIDTH,
-                                      self.SCREEN_HEIGHT)
+            self.invent.render_invent(self.screen, self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
 
             # Splat to screen
             pygame.display.flip()
@@ -189,13 +176,13 @@ class Game:
 
         # Init map
         self.map = MapClass(seed=9)
+
         # Init fog
         self.fog = Fog(10, 5)
 
         # Init character
-        self.player = Player(MAP.SIZE_X / 2 + 0.5,
-                             MAP.SIZE_Y / 2 + 0.5,
-                             self.map)
+        self.player = Player(MAP.SIZE_X / 2 + 0.5, MAP.SIZE_Y / 2 + 0.5, self.map)
+
         if Sprite.deserialize("player_sprite") is not None:
             self.player.sprite = Sprite.deserialize("player_sprite").image
 
@@ -210,24 +197,13 @@ class Game:
         self.objects.append(self.player)  # player is always the first item
 
         # Init camera
-        self.camera = Camera(self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
-
-        # Add test Pikachi (Pikachodes?) (plural?)
-        #for i in xrange(10):
-            #self.objects.append(PikachuStatue(random.randint(0, 10),
-            #                                  random.randint(0, 10)))        # Add test sword
-        #self.objects.append(Swipe(3, 3))
+        self.camera = Camera((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
 
         # Spawn test arrow enemies
         for i in xrange(0, 10):
-            self.objects.append(ArrowEnemy(random.randint(MAP.SIZE_X * 1 / 4, MAP.SIZE_X * 3 / 4) - 0.5,
-                                           random.randint(MAP.SIZE_Y * 1 / 4, MAP.SIZE_Y * 3 / 4) - 0.5, 1, self.map))
-
-        # self.objects.append(ChaserEnemy(3, 3))  # Testing with new enemy type
-        # self.objects.append(ChaserEnemy(3, 3, self.map))  # Testing with new enemy type
-        self.objects.append(Enemy(3, 3, 10, self.map))
+            self.objects.append(ArrowEnemy((random.randint(MAP.SIZE_X * 1 / 4, MAP.SIZE_X * 3 / 4) - 0.5,
+                                            random.randint(MAP.SIZE_Y * 1 / 4, MAP.SIZE_Y * 3 / 4) - 0.5), 1, self.map))
 
 
 # Startup game!
-
 Game()

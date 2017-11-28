@@ -8,21 +8,34 @@ from Helpers import Vector
 
 
 class Object(object):
-    # Main variables for characters
-    x = 0  # in game tile units (1.0 = 1 tile)
-    y = 0  # in game tile units
-    sprite = None  # (pygame.Surface) current object sprite (todo: animations etc)
-    collision = None  # (CollisionBox) collision data (None=no collision/ghost)
-    _sprite_angle = 0  # (float) angle of rotation for this sprite in degrees (use the property sprite_angle)
-    sprite_origin = None  # (Vector) origin of sprite
-    debug_render_hitbox = False  # (Boolean) whether to render the hitbox (for debugging)
-    dead = False  # (Boolean) If true, object will be destroyed and removed from the object list as soon as possible
+    """Base class for movable game object (including characters)
+        Args:
+            x, y (float): Position of the objects, in game tile units
+            sprite (pygame.Surface): Current object sprite
+            collision (CollisionBox): Collision data, or None if there is no collision box
+            sprite_angle (float property): Sprite angle of rotation, in anticlockwise degrees
+            sprite_origin (Vector): Origin of the object, in pixels relative to its sprite image
+            dead (Boolean): Whether the object is dead. When a dead object is acknowledged by the Game class, it is destroyed and removed from the object list
+            debug_render_hitbox (Boolean): When True, draws the collision box over the object
+    """
+    x = 0
+    y = 0
+    sprite = None
+    collision = None
+    _sprite_angle = 0
+    sprite_origin = None
+    dead = False
+    debug_render_hitbox = False
 
     parent_map = None # The map the object is created on
     debug_dyna = None
 
     def __init__(self, x, y, parent_map):
-        """Initialise object at the given position"""
+        """Initialise object at the given position
+            Args:
+                x (float): x position to spawn the object at, in tile units
+                y (float): y position to spawn the object at, in tile units
+                parent_map (MapClass): Map on which the object lives"""
         self.x = x
         self.y = y
         self.collision = CollisionBox((0.0, 0.0), (1.0, 1.0), True)
@@ -30,11 +43,15 @@ class Object(object):
 
     def update(self, delta_time, player, object_list, map):
         self.debug_dyna = player.dynasword
-        pass  # to be overloaded by objects
+        pass  # to be overridden by subclasses
 
     def render(self, screen, camera):
-        """Renders the object (function overloadable by subclasses)"""
+        """Renders the object to the game screen
+            Args:
+                screen (pygame.Surface): Screen surface to render the sprite to
+                camera (Camera): The game camera"""
         camera_vector = Vector(camera.x, camera.y)
+
         if self.sprite is not None:
             if self.sprite_angle is not 0:
                 # Draw rotated sprite
@@ -95,17 +112,6 @@ class Object(object):
             coll_right = self.get_right() * self.collision.width * MAP.TILE_SIZE
             coll_down = self.get_down() * self.collision.height * MAP.TILE_SIZE
 
-            # Check collision with player dynasword
-            if self.debug_dyna:
-                other_coll_origin = Vector(self.debug_dyna.x, self.debug_dyna.y)
-
-                if self.debug_dyna.sprite_origin:
-                    other_coll_origin -= self.debug_dyna.get_right() * self.debug_dyna.sprite_origin.x
-                    other_coll_origin -= self.debug_dyna.get_down() * self.debug_dyna.sprite_origin.y
-
-                other_coll_right = self.debug_dyna.get_right() * self.debug_dyna.collision.width * MAP.TILE_SIZE
-                other_coll_down = self.debug_dyna.get_down() * self.debug_dyna.collision.height * MAP.TILE_SIZE
-
             # Render sides of box
             # Draw pivot point
             if self.sprite_origin:
@@ -131,16 +137,13 @@ class Object(object):
                 pygame.draw.rect(screen, (0, 0, 0), bounds_rect, 1)
 
     def move(self, (move_x, move_y), object_list):
-        """Performs collision checking and moves object by offset of
-           move_x and move_y if possible
+        """Performs collision checking and moves the object, if possible
 
-           (move_x, move_y) -- How far to move, in tile units
-           object_list -- List of objects in the environment (for
-                          collision)
-
-           Todo: Push the player out of a surface in the opposite
-           direction to their attempted movement, return a vector
-           portraying how much they moved
+            Args:
+                (move_x, move_y) -- How far to move, in tile units
+                object_list -- List of objects in the environment
+            Returns:
+                Whether or not the move was successful (False is returned if a collision occurs)
         """
 
         # Test one step ahead. If the area is clear, self.x and self.y are set to the desired movement location
@@ -157,16 +160,16 @@ class Object(object):
                 self_box = self.collision.get_bounding_box(self.sprite_angle, (0, 0), (desired_x, desired_y))
 
             # Check with other objects
-            for object in object_list:
-                if object == self:
+            for obj in object_list:
+                if obj == self:
                     continue  # don't collide with yourself plz
-                if not (object.collision and object.collision.solid):
+                if not (obj.collision and obj.collision.solid):
                     continue  # don't collide with non-solids
 
-                if object.sprite_origin:
-                    obj_box = object.collision.get_bounding_box(object.sprite_angle, tuple(object.sprite_origin), (object.x, object.y))
+                if obj.sprite_origin:
+                    obj_box = obj.collision.get_bounding_box(obj.sprite_angle, tuple(obj.sprite_origin), (obj.x, obj.y))
                 else:
-                    obj_box = object.collision.get_bounding_box(object.sprite_angle, (0, 0), (object.x, object.y))
+                    obj_box = obj.collision.get_bounding_box(obj.sprite_angle, (0, 0), (obj.x, obj.y))
 
                 if not (self_box[0] >= obj_box[2] or self_box[2] <= obj_box[0] or self_box[1] >= obj_box[3] or self_box[3] <= obj_box[1]):
                     desired_x = self.x
@@ -193,6 +196,7 @@ class Object(object):
                             desired_y = self.y
                             collided = True
 
+        # Update position and return
         self.x = desired_x
         self.y = desired_y
 
@@ -220,6 +224,7 @@ class Object(object):
                 vec = Vector(self.x, self.y)
                 vec += self.get_right() * (float(pixel_x) / MAP.TILE_SIZE)
                 vec += self.get_down() * (float(pixel_y) / MAP.TILE_SIZE)
+                return vec
 
     def get_down(self):
         """Returns local 'down' Vector according to sprite rotation. Default is 0,1"""
