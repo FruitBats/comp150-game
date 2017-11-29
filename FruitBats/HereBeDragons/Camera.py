@@ -42,3 +42,10 @@ class Camera:
             self.x = MAP.SIZE_X - (self.view_width / MAP.TILE_SIZE)
         if self.y + self.view_height / MAP.TILE_SIZE >= MAP.SIZE_Y:
             self.y = MAP.SIZE_Y - (self.view_height / MAP.TILE_SIZE)
+
+    def get_world_mouse_position(self):
+        """Gets the absolute position of the mouse in the world, in tile units
+
+            Returns: (Vector) Position of the mouse in tile units
+        """
+        return Vector((self.x + float(pygame.mouse.get_pos()[0]) / MAP.TILE_SIZE), self.y + float(pygame.mouse.get_pos()[1]) / MAP.TILE_SIZE)

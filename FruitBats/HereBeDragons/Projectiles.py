@@ -6,10 +6,20 @@ from DynaSword import *
 
 
 class Arrow(Object):
-    life_time = 0
+    """Arrow projectile
+    Attributes:
+        life_time (float): Current time until despawn, in seconds
+        start_life_time (float): Initial time length before despawn, in seconds
+        start_flight_time (float): Initial time expected to fly in the air (varies depending on initial distance and speed)
+        flight_time (float): Current time until flight ends and arrow lands on the ground, in seconds
+        tilt_angle (float): Angle toward which the arrow will tilt during flight, in degrees
+        deflected (boolean): Whether the arrow has been deflected by the player or an enemy
+        power (float): Amount of damage the arrow deals in a collision with a character
+    """
+    life_time = 0.0
+    flight_time = 1.5
     start_life_time = 5
     start_flight_time = 1.5
-    flight_time = 1.5
     tilt_angle = 0
     deflected = False
     power = 10
@@ -55,7 +65,7 @@ class Arrow(Object):
         self.flight_time = self.start_flight_time
 
     def update(self, delta_time, player, object_list, map):
-        """Frame update function. Fly around all willy-nilly like an arrow. See Object for parameter details."""
+        """Frame update function. Fly around all willy-nilly like an arrow. Overrides Object.update"""
         # If not flying, stay in position
         if self.flight_time <= 0:
             self.velocity = Vector(0, 0)
@@ -115,10 +125,6 @@ class Arrow(Object):
                         self.flight_time = 0
                         obj.hurt(self.power)
                         break
-
-            # Spin like mad (edit: never mind? precision shots look cooler?)
-            #self.sprite_origin = Vector(self.sprite.get_width() / 2, self.sprite.get_height() / 2)
-            #self.sprite_angle += random.randrange(3000, 4000) * delta_time
 
         # Move
         self.move(tuple(self.velocity * delta_time), object_list)

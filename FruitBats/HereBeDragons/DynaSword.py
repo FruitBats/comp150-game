@@ -15,18 +15,30 @@ class DynaAttack:
 
 
 class DynaSword(Object):
-    handle_origin = None  # sprite origin = sword handle (Vector)
-    centre_origin = None  # sprite origin = center of image (Vector)
-    attack_state = DynaAttack.NONE  # current DynaAttack state
-    current_attack_start_time = 0  # initial value of attack timer on attack
-    current_attack_timer = 0  # time til current attack ends, in seconds
-    current_attack_angle = 0  # central angle of attack in degrees
-    current_attack_target = None  # Vector position of boomerang target
-    current_attack_cooldown = 0  # cooldown timer
-    mouse_x = 0  # mouse position relative to world
-    mouse_y = 0  # mouse position relative to world
-    origin_x = 0  # position of the sword's origin (usually the player's hand)
-    origin_y = 0  # position of the sword's origin (usually the player's hand)
+    """DynaSword: The dynamic sword!
+
+    Attributes:
+        handle_origin (Vector): Origin of the handle on the sword sprite, in pixels
+        centre_origin (Vector): Origin of the center of the sword sprite, in pixels
+        attack_state (DynaAttack constant): Current state of attack
+        current_attack_start_time (float): Initial value of attack timer during attack, in seconds
+        current_attack_timer (float): Current state of the attack timer, i.e. progress of attack, in seconds
+        current_attack_angle (float): Current angle of attack (LOOK AT thiS)
+        current_attack_target (Vector): Position of the boomerang target, in tiles
+        current_attack_cooldown (float): Current time til attack finishes cooldown, in seconds
+        world_origin (Vector): Base position of the sword in the world disregarding its current movement/attacks, in tiles
+        mouse (float): Absolute position of the mouse in the world, in tile units
+    """
+    handle_origin = None
+    centre_origin = None
+    attack_state = DynaAttack.NONE
+    current_attack_start_time = 0
+    current_attack_timer = 0
+    current_attack_angle = 0
+    current_attack_target = None
+    current_attack_cooldown = 0
+    world_origin = None
+    world_mouse = None
 
     swipe_time = 0.1  # time, in seconds, a swipe will take
     swipe_range = 75  # range of swipe attack in degrees
@@ -49,10 +61,9 @@ class DynaSword(Object):
              y: y position to spawn object
              owner (Object): Object that is using the sword.
         """
-        sprite = pygame.image.load("graphics/sword.png")
-        sprite = pygame.transform.scale(sprite, (int(sprite.get_width() * MAP.RATIO), int(sprite.get_height() * MAP.RATIO)))
+        self.sprite = pygame.image.load("graphics/sword.png")
+        self.sprite = pygame.transform.scale(self.sprite, (int(self.sprite.get_width() * MAP.RATIO), int(self.sprite.get_height() * MAP.RATIO)))
 
-        self.sprite = sprite
         self.x = x
         self.y = y
 
@@ -60,6 +71,10 @@ class DynaSword(Object):
 
         self.handle_origin = Vector(self.sprite.get_width() / 3, self.sprite.get_height())
         self.centre_origin = Vector(self.sprite.get_width() / 2, self.sprite.get_height() / 2)
+
+        self.world_origin = Vector(0, 0)
+        self.world_mouse = Vector(0, 0)
+
         self.collision = CollisionBox((0, 0), (self.sprite.get_width(), self.sprite.get_height()), False)
 
     def update(self, delta_time, player, object_list, map):
@@ -76,10 +91,10 @@ class DynaSword(Object):
         hand = Vector(self.owner.x, self.owner.y)
         if isinstance(self.owner, Character):
             hand = self.owner.get_hand_position()
-        self.origin_x = self.owner.x
-        self.origin_y = self.owner.y
-        self.x = self.origin_x - math.sin(math.radians(self.current_attack_angle)) * float(self.owner.sprite.get_width()) / MAP.TILE_SIZE * 0.6
-        self.y = self.origin_y - math.cos(math.radians(self.current_attack_angle)) * float(self.owner.sprite.get_height()) / MAP.TILE_SIZE * 0.6
+
+        self.world_origin = Vector(self.owner.x, self.owner.y)
+        self.x = self.world_origin.x - math.sin(math.radians(self.current_attack_angle)) * float(self.owner.sprite.get_width()) / MAP.TILE_SIZE * 0.6
+        self.y = self.world_origin.y - math.cos(math.radians(self.current_attack_angle)) * float(self.owner.sprite.get_height()) / MAP.TILE_SIZE * 0.6
 
         # Do attack-specific positioning and angling
         if self.attack_state == DynaAttack.NONE or self.attack_state == DynaAttack.COOLDOWN:
@@ -97,14 +112,12 @@ class DynaSword(Object):
                     self.current_attack_cooldown = 0
                     self.attack_state = DynaAttack.NONE
         elif self.attack_state == DynaAttack.SWIPING:
-            # Do a 45-degree progressive swipe along attack_timer
+            # Do a progressive swipe along attack_timer
             self.sprite_angle = self.current_attack_angle - self.swipe_range + (self.swipe_range * 2 * self.current_attack_timer / self.swipe_time)
             self.sprite_origin = self.handle_origin
         elif self.attack_state == DynaAttack.BLOCKING:
             # Do a 90-degree block
-            self.current_attack_angle = math.degrees(direction(
-                                (self.origin_x, self.origin_y),
-                                (self.mouse_x, self.mouse_y)))
+            self.current_attack_angle = math.degrees(direction(tuple(self.world_origin), tuple(self.world_mouse)))
             self.sprite_angle = self.current_attack_angle - 90
             self.sprite_origin = self.centre_origin
         elif self.attack_state == DynaAttack.BOOMERANGING:
@@ -114,8 +127,8 @@ class DynaSword(Object):
             self.sprite_origin = self.centre_origin
 
             progress_factor = math.sin(math.radians(180) * self.current_attack_timer / self.current_attack_start_time)
-            self.x = self.origin_x + ((self.current_attack_target.x - self.origin_x) * progress_factor)
-            self.y = self.origin_y + ((self.current_attack_target.y - self.origin_y) * progress_factor)
+            self.x = self.world_origin.x + ((self.current_attack_target.x - self.world_origin.x) * progress_factor)
+            self.y = self.world_origin.y + ((self.current_attack_target.y - self.world_origin.y) * progress_factor)
 
         # Decrement attack timer and stop if attack is over
         self.current_attack_timer -= delta_time
@@ -134,8 +147,6 @@ class DynaSword(Object):
 
             # Cap timer to 0
             self.current_attack_timer = 0
-
-        self.collision_tests(object_list)  # err I don't nkow who's doing this but I'll get my own version done just in case this was left behind?
 
         # Check collisions between the centre line of this sword and characters
         centre_line_start = self.get_pos_at_pixel((self.sprite.get_width() / 2, self.sprite.get_height()))
@@ -160,11 +171,7 @@ class DynaSword(Object):
             screen: Surface representing the game screen
             camera: Pointer to the game camera object
         """
-        # Hack: self.mouse_x and mouse_y are set here because the Update
-        # function doesn't provide the camera whilst the render function does..
-
-        self.mouse_x = (camera.x + float(pygame.mouse.get_pos()[0]) / MAP.TILE_SIZE)
-        self.mouse_y = (camera.y + float(pygame.mouse.get_pos()[1]) / MAP.TILE_SIZE)
+        self.world_mouse = camera.get_world_mouse_position()
 
         Object.render(self, screen, camera)
 
@@ -173,25 +180,19 @@ class DynaSword(Object):
         if self.attack_state == DynaAttack.NONE:
             self.attack_state = DynaAttack.SWIPING
             self.current_attack_timer = self.swipe_time
-            self.current_attack_angle = math.degrees(direction((self.origin_x, self.origin_y), (self.mouse_x, self.mouse_y)))
+            self.current_attack_angle = math.degrees(direction(tuple(self.world_origin), tuple(self.world_mouse)))
 
     def block(self):
         """Performs sideways block if not on cooldown"""
         if self.attack_state == DynaAttack.NONE:
             self.attack_state = DynaAttack.BLOCKING
             self.current_attack_timer = self.block_time
-            self.current_attack_angle = math.degrees(direction((self.origin_x, self.origin_y), (self.mouse_x, self.mouse_y)))
+            self.current_attack_angle = math.degrees(direction(tuple(self.world_origin), tuple(self.world_mouse)))
 
     def boomerang(self):
         """Throws sword like a boomerang (if not on cooldown)"""
         if self.attack_state == DynaAttack.NONE:
             self.attack_state = DynaAttack.BOOMERANGING
-            self.current_attack_target = Vector(self.mouse_x, self.mouse_y)
+            self.current_attack_target = Vector(self.world_mouse.x, self.world_mouse.y)
             self.current_attack_start_time = 0.25 * distance((self.x, self.y), self.current_attack_target)
             self.current_attack_timer = self.current_attack_start_time
-
-    def collision_tests(self, objects):
-        collision = False
-        # Todo
-        if collision:
-            self.attack_state = DynaAttack.NONE
